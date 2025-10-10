@@ -2,10 +2,6 @@
 
 # -*- coding: utf-8 -*-
 
-"""Examp Doublet Lens 3D color"""
-
-
-
 import pkg_resources
 import numpy as np
 import matplotlib.pyplot as plt
@@ -730,6 +726,7 @@ print("Nombres posibles:", selector_F2.Names_Glass_possible)
 
 fig, ax, axins = selector_F2.plot_nv_with_inset()
 plt.show()
+
 
 
 
