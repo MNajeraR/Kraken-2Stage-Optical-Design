@@ -609,29 +609,38 @@ configuracion_1 = Kos.Setup()
 a = len(configuracion_1.NAMES)
 
                 
+# Lista de vidrios de referencia 
+refs = ["S-FPL51", "F8", "BK7", "S-FPL53"]
 
-selector_BK7 = Glass_Selector(configuracion_1, WR=(0.34, 1.10),
-                          name_glass="BK7", delta_n=0.025, delta_vd=5.0, pt_threshold=0.8)
+result = select_and_center_many(
+    confi = configuracion_1,
+    reference_names = refs,
+    WR = (0.34, 1.10),
+    delta_n = 0.025,
+    delta_vd = 5.0,
+    pt_threshold = 0.8,
+    prefer_universe = "possible",   # si no está en possible, cae a filtered → all
+    target_len = 15,
+    plot_each = True              # pon True para una figura por vidrio
+)
 
-print("Candidatos n/vd:", selector_BK7.Glass_idx_filtered.size)
-print("Cumplen PT>=0.8:", selector_BK7.Glass_idx_possible.size)
-print("Nombres posibles:", selector_BK7.Names_Glass_possible)
+# Resumen
+print("\nUniversos elegidos por vidrio:")
+for ref, where in result["universes"].items():
+    print(f"  {ref}: {where}")
 
-fig, ax, axins = selector_BK7.plot_nv_with_inset()
-plt.show()
+print("\nÍndices de centro (por arreglo base en el universo elegido):")
+for ref, idx in zip(refs, result["center_indices"]):
+    print(f"  {ref}: {idx}")
+
+print(f"\nLongitud efectiva usada para todas las ventanas: {result['feasible_len']}")
+
+print("\nVentanas centradas (por vidrio):")
+for ref, win in zip(refs, result["cropped_names"]):
+    print(f"  {ref}: {list(win)}")
 
 
 
-
-selector_F2 = Glass_Selector(configuracion_1, WR=(0.34, 1.10),
-                          name_glass="F2", delta_n=0.025, delta_vd=5.0, pt_threshold=0.7)
-
-print("Candidatos n/vd:", selector_F2.Glass_idx_filtered.size)
-print("Cumplen PT>=0.7:", selector_F2.Glass_idx_possible.size)
-print("Nombres posibles:", selector_F2.Names_Glass_possible)
-
-fig, ax, axins = selector_F2.plot_nv_with_inset()
-plt.show()
 
 
 
