@@ -46,13 +46,6 @@ class _GlassVals:
     n: float
     vd: float
 
-class _GlassVals:
-    idx: int
-    WT: np.ndarray
-    PT: np.ndarray
-    n: float
-    vd: float
-
 class Glass_Selector:
     """
     Selection and filtering of glasses in the (n, v_d) plane, with a window over
@@ -638,6 +631,7 @@ print(f"\nLongitud efectiva de los arreglos: {result['feasible_len']}")
 print("\nListas centradas (por vidrio):")
 for ref, win in zip(refs, result["cropped_names"]):
     print(f"  {ref}: {list(win)}")
+
 
 
 
