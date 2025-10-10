@@ -344,6 +344,168 @@ class Glass_Selector:
         ax.legend(by_label.values(), by_label.keys(), loc=legend_loc, fontsize=12)
 
         return fig, ax, axins
+
+def pick_name_universe(selector, prefer: str = "possible"):\
+        
+        """
+        Devuelve (names_array, label) eligiendo dónde buscar el centro:
+        - 'possible' si existe y no está vacía
+        - si no, 'filtered'
+        - si no, 'all'
+        """
+        
+        if prefer == "possible" and getattr(selector, "Names_Glass_possible", None) is not None:
+            if selector.Names_Glass_possible.size:
+                return selector.Names_Glass_possible, "possible"
+        if getattr(selector, "Names_Glass_filtered", None) is not None and selector.Names_Glass_filtered.size:
+            return selector.Names_Glass_filtered, "filtered"
+        
+        return selector.Names_Glass, "all"
+    
+def _find_center_index(arr: np.ndarray, center: Any) -> int:
+     """Robusto: exacto → exacto case-insensitive → subcadena case-insensitive."""
+     a = np.asarray(arr)
+     if a.size == 0:
+         raise ValueError("Empty array; cannot find center.")
+     # Igualdad directa
+     idx = np.where(a == center)[0]
+     if idx.size:
+         return int(idx[0])
+     # Strings: case-insensitive y subcadena
+     if a.dtype == object and isinstance(center, str):
+         A = np.array([str(x) for x in a], dtype=object)
+         c = center.casefold()
+         idx = np.where(np.array([x.casefold() == c for x in A]))[0]
+         if idx.size:
+             return int(idx[0])
+         idx = np.where(np.array([c in x.casefold() for x in A]))[0]
+         if idx.size:
+             return int(idx[0])
+     raise ValueError(f"Center value {center!r} not found in provided array.")   
+        
+def centered_windows_safe(
+    lists: Sequence[Sequence[Any]],
+    centers: Sequence[Any],
+    target_len: Optional[int] = None,
+    return_center_indices: bool = False,
+    strict: bool = False,
+) -> Tuple[List[np.ndarray], Optional[List[int]]]:
+    
+    """
+    Ventanas centradas con largo común:
+      - Si target_len > factible, reduce a lo factible (salvo strict=True).
+      - Búsqueda de centros robusta.
+    """
+    if len(lists) != len(centers):
+        raise ValueError("`lists` y `centers` deben tener la misma longitud.")
+    arrays = [np.array(seq, dtype=object) for seq in lists]
+    if any(len(a) == 0 for a in arrays):
+        raise ValueError("Todas las secuencias deben ser no vacías.")
+
+    center_indices = [_find_center_index(a, c) for a, c in zip(arrays, centers)]
+
+    # Longitud máxima simétrica por lista
+    max_possible = []
+    for a, c in zip(arrays, center_indices):
+        left  = c + 1
+        right = len(a) - c
+        max_possible.append(2 * min(left, right) - 1)
+
+    feasible_len = min(max_possible)
+    if target_len is None:
+        L = feasible_len
+    else:
+        if target_len > feasible_len:
+            if strict:
+                raise ValueError(f"target_len={target_len} es muy grande; máximo factible: {feasible_len}")
+            L = feasible_len
+        elif target_len < 1:
+            raise ValueError("target_len debe ser >= 1")
+        else:
+            L = target_len
+
+    def crop(arr: np.ndarray, c: int, L: int) -> np.ndarray:
+        left = (L - 1) // 2
+        start = max(0, c - left)
+        end = start + L
+        if end > len(arr):
+            end = len(arr)
+            start = end - L
+        return arr[start:end]
+
+    cropped = [crop(a, c, L) for a, c in zip(arrays, center_indices)]
+    return (cropped, center_indices) if return_center_indices else (cropped, None)    
+        
+# ---------- AUTOMATIZADOR PARA n VIDRIOS ----------
+
+def select_and_center_many(
+     confi: Any,
+     reference_names: Sequence[str],
+     WR: Tuple[float, float] = (0.34, 1.10),
+     delta_n: float = 0.025,
+     delta_vd: float = 5.0,
+     pt_threshold: float = 0.8,
+     prefer_universe: str = "possible",
+     target_len: Optional[int] = 15,
+     plot_each: bool = False,
+ ) -> Dict[str, Any]:
+     """
+     Crea un Glass_Selector por cada nombre de referencia en `reference_names`,
+     elige el universo adecuado para centrar (possible→filtered→all),
+     y devuelve ventanas centradas de longitud común.
+ 
+     Returns dict con:
+       - 'selectors': {name: Glass_Selector}
+       - 'universes': {name: ('possible'|'filtered'|'all')}
+       - 'name_arrays': [np.ndarray, ...] en el orden de reference_names
+       - 'cropped_names': [np.ndarray, ...] ventanas centradas
+       - 'center_indices': [int, ...] índices del centro en cada arreglo base
+       - 'feasible_len': int longitud final usada
+     """
+     selectors = {}
+     universes = {}
+     name_arrays: List[np.ndarray] = []
+ 
+     # Construir selectores
+     for ref in reference_names:
+         sel = Glass_Selector(
+             confi, WR=WR, name_glass=ref,
+             delta_n=delta_n, delta_vd=delta_vd, pt_threshold=pt_threshold
+         )
+         selectors[ref] = sel
+         names_arr, where = pick_name_universe(sel, prefer=prefer_universe)
+         universes[ref] = where
+         name_arrays.append(names_arr)
+ 
+         if plot_each:
+             print(f"\n[{ref}] Universo: {where} | Candidatos nv: {sel.Glass_idx_filtered.size} | Posibles: {sel.Glass_idx_possible.size}")
+             fig, ax, axins = sel.plot_nv_with_inset(title=f"n-vd around '{ref}'")
+             plt.show()
+ 
+     # Centrar ventanas por nombre de referencia
+     cropped, center_indices = centered_windows_safe(
+         name_arrays,
+         centers=list(reference_names),
+         target_len=target_len,
+         return_center_indices=True,
+         strict=False
+     )
+ 
+     # Longitud efectiva usada
+     if len(cropped):
+         feasible_len = len(cropped[0])
+     else:
+         feasible_len = 0
+ 
+     return {
+         "selectors": selectors,
+         "universes": universes,
+         "name_arrays": name_arrays,
+         "cropped_names": cropped,
+         "center_indices": center_indices,
+         "feasible_len": feasible_len,
+     }   
+            
         
 # _________________________________________#
 
@@ -464,6 +626,7 @@ print("Nombres posibles:", selector_F2.Names_Glass_possible)
 
 fig, ax, axins = selector_F2.plot_nv_with_inset()
 plt.show()
+
 
 
 
