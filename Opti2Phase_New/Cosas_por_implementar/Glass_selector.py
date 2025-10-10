@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Any, Iterable, List, Optional, Sequence, Tuple, Dict
 
 import pkg_resources
 import numpy as np
@@ -726,6 +729,7 @@ print("Nombres posibles:", selector_F2.Names_Glass_possible)
 
 fig, ax, axins = selector_F2.plot_nv_with_inset()
 plt.show()
+
 
 
 
