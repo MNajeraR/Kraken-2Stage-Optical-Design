@@ -46,12 +46,22 @@ class _GlassVals:
     n: float
     vd: float
 
+class _GlassVals:
+    idx: int
+    WT: np.ndarray
+    PT: np.ndarray
+    n: float
+    vd: float
+
 class Glass_Selector:
     """
-    Selección y filtrado de vidrios en el plano (n, v_d), con ventana sobre transmisión PT y WT.
-    - Aplica filtros: rango de WT, umbral de transmisión mínima, y ventana alrededor de un vidrio de referencia.
-    - Conserva el último ejemplar por nombre (duplicados anteriores quedan registrados).
-    - No imprime en __init__; expone información vía atributos y métodos.
+    Selection and filtering of glasses in the (n, v_d) plane, with a window over
+    transmission PT and WT.
+
+    - Applies filters: WT range, minimum transmission threshold, and a window
+      around a reference glass.
+    - Keeps the last occurrence per name (previous duplicates are recorded).
+    - Does not print in __init__; exposes information via attributes and methods.
     """
 
     def __init__(
@@ -66,27 +76,27 @@ class Glass_Selector:
         """
         Parameters
         ----------
-        confi.IT : iterable con tuplas/listas, cada item: (WT, PT, ...)
-        confi.NAMES : nombres por índice
-        confi.NM : lista; se asume NM[i][2] = n, NM[i][3] = v_d
-        WR : (bajo, alto) rango aceptado para WT
-        name_glass : nombre del vidrio de referencia (para centrar ventana en n, v_d)
-        delta_n, delta_vd : ventanas alrededor del vidrio de referencia
-        pt_threshold : umbral mínimo de transmisión (fracción si <=1; % si >1)
+        confi.IT : iterable with tuples/lists, each item: (WT, PT, ...)
+        confi.NAMES : names by index
+        confi.NM : list; assume NM[i][2] = n, NM[i][3] = v_d
+        WR : (low, high) accepted WT range
+        name_glass : reference glass name (to center the (n, v_d) window)
+        delta_n, delta_vd : half-widths of the window around the reference glass
+        pt_threshold : minimum transmission threshold (fraction if <=1; % if >1)
         """
         self.low_r, self.high_r = WR
         self.pt_threshold = (pt_threshold / 100.0) if pt_threshold > 1 else float(pt_threshold)
 
         self.glass_dict: Dict[str, _GlassVals] = {}       # name -> _GlassVals
-        self.duplicates_dict: Dict[str, List[dict]] = {}  # name -> historial
+        self.duplicates_dict: Dict[str, List[dict]] = {}  # name -> history
         self.skipped_info: List[dict] = []                # [{idx, name, reason}, ...]
-        self.ref_i: Optional[int] = None                  # índice del vidrio de referencia
+        self.ref_i: Optional[int] = None                  # reference glass index
 
         names_arr = np.asarray(getattr(confi, "NAMES", []), dtype=object)
         IT = getattr(confi, "IT", [])
         NM = getattr(confi, "NM", [])
 
-        # --- localizar vidrio de referencia (última ocurrencia) ---
+        # --- locate reference glass (last occurrence) ---
         center_n = center_vd = None
         if name_glass is not None and names_arr.size:
             hits = np.where(names_arr == name_glass)[0]
@@ -102,9 +112,9 @@ class Glass_Selector:
                 except Exception:
                     self.skipped_info.append({"idx": int(self.ref_i), "name": str(name_glass),
                                               "reason": "invalid reference glass n/v_d"})
-                    center_n = center_vd = None  # deshabilita filtro (n, v_d)
+                    center_n = center_vd = None  # disable (n, v_d) filter
 
-        # --- recorrer configuración y construir diccionarios ---
+        # --- iterate configuration and build dictionaries ---
         for i, item in enumerate(IT):
             name = (names_arr[i] if i < names_arr.size else f"idx_{i}")
 
@@ -116,7 +126,7 @@ class Glass_Selector:
             PT = np.asarray(item[1], dtype=float).ravel()
             WT_sel, PT_sel = self._filter_pair(WT, PT)
 
-            # leer n y v_d
+            # read n and v_d
             if i < len(NM) and len(NM[i]) > 3:
                 try:
                     n_Glass = float(NM[i][2])
@@ -131,7 +141,7 @@ class Glass_Selector:
 
             if WT_sel.size > 0:
                 if name in self.glass_dict:
-                    # guardar el previo como duplicado
+                    # save the previous one as duplicate
                     prev = self.glass_dict[name]
                     self.duplicates_dict.setdefault(name, []).append({
                         "idx": prev.idx, "WT": prev.WT, "PT": prev.PT, "n": prev.n, "v_d": prev.vd
@@ -141,19 +151,19 @@ class Glass_Selector:
             else:
                 self.skipped_info.append({"idx": i, "name": name, "reason": "no values in range"})
 
-        # --- convertir diccionario a arreglos/llaves ---
+        # --- convert dictionary to arrays/keys ---
         if self.glass_dict:
             vals = list(self.glass_dict.values())
             keys = list(self.glass_dict.keys())
 
             self.Glass_idx   = np.fromiter((v.idx for v in vals), dtype=int, count=len(vals))
-            self.WT_all      = [v.WT for v in vals]  # longitudes variables -> lista
+            self.WT_all      = [v.WT for v in vals]  # variable lengths -> list
             self.PT_all      = np.array([v.PT for v in vals], dtype=object)
             self.n_all       = np.fromiter((v.n for v in vals), dtype=float, count=len(vals))
             self.vd_all      = np.fromiter((v.vd for v in vals), dtype=float, count=len(vals))
             self.Names_Glass = np.asarray(keys, dtype=object)
         else:
-            # inicializar vacíos coherentes
+            # initialize consistent empties
             self.Glass_idx   = np.array([], dtype=int)
             self.WT_all      = []
             self.PT_all      = np.array([], dtype=object)
@@ -161,7 +171,7 @@ class Glass_Selector:
             self.vd_all      = np.array([], dtype=float)
             self.Names_Glass = np.array([], dtype=object)
 
-        # --- filtro de sanidad en n/vd ---
+        # --- sanity filter on n/vd ---
         if self.n_all.size:
             finite = np.isfinite(self.n_all) & np.isfinite(self.vd_all)
             final_mask = finite & (self.n_all >= 1.0) & (self.vd_all != 0)
@@ -176,7 +186,7 @@ class Glass_Selector:
         else:
             idx_keep = np.array([], dtype=int)
 
-        # --- filtro por ventana (n, v_d) relativo al vidrio de referencia ---
+        # --- (n, v_d) window relative to reference glass ---
         if center_n is not None and center_vd is not None and self.n_all.size:
             mask_nv = (
                 (self.n_all  >= center_n  - delta_n) & (self.n_all  <= center_n  + delta_n) &
@@ -191,7 +201,7 @@ class Glass_Selector:
         self.Names_Glass_filtered = self.Names_Glass[mask_nv]
         self.idx_filtered         = np.where(mask_nv)[0]
 
-        # --- PT mínimo por elemento del subconjunto (NaN/empty-safe) ---
+        # --- per-element min PT in that subset (NaN/empty-safe) ---
         if self.idx_filtered.size:
             PT_sub = self.PT_all[self.idx_filtered]
             self.mins_filtered = np.array([
@@ -200,7 +210,7 @@ class Glass_Selector:
         else:
             self.mins_filtered = np.array([], dtype=float)
 
-        # --- filtro de transmisión ---
+        # --- transmission filter ---
         mask_PT_sub = (self.mins_filtered >= self.pt_threshold) & np.isfinite(self.mins_filtered)
 
         self.Glass_idx_possible   = self.Glass_idx_filtered[mask_PT_sub]
@@ -208,7 +218,7 @@ class Glass_Selector:
         self.vd_all_possible      = self.vd_all_filtered[mask_PT_sub]
         self.Names_Glass_possible = self.Names_Glass_filtered[mask_PT_sub]
 
-        # bandera: ¿sobrevivió el vidrio de referencia?
+        # flag: did the reference glass survive into "possible"?
         self.reference_survives = (
             self.ref_i is not None and self.Glass_idx_possible.size and
             np.any(self.Glass_idx_possible == self.ref_i)
@@ -216,7 +226,7 @@ class Glass_Selector:
 
     # -------- helper methods --------
     def _filter_pair(self, WT: np.ndarray, PT: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Recorta WT/PT al mismo tamaño y filtra por [self.low_r, self.high_r]."""
+        """Trim WT/PT to the same length and filter by [self.low_r, self.high_r]."""
         m = min(WT.size, PT.size)
         if m == 0:
             return np.empty(0, dtype=float), np.empty(0, dtype=float)
@@ -225,10 +235,10 @@ class Glass_Selector:
         return WT[mask], PT[mask]
 
     def get_accepted(self, sort_by_idx: bool = True) -> List[Tuple[str, int, np.ndarray, np.ndarray, float, float]]:
-        """Devuelve [(name, idx, WT_sel, PT_sel, n, v_d), ...]."""
+        """Return [(name, idx, WT_sel, PT_sel, n, v_d), ...]."""
         items = [(name, v.idx, v.WT, v.PT, v.n, v.vd) for name, v in self.glass_dict.items()]
         if sort_by_idx:
-            items.sort(key=lambda x: x[1])  # por idx
+            items.sort(key=lambda x: x[1])  # by idx
         return items
 
     def print_skipped(self) -> None:
@@ -238,7 +248,7 @@ class Glass_Selector:
         print("Total skipped:", len(self.skipped_info))
 
     def get_reference_info(self) -> Optional[dict]:
-        """Regresa info del vidrio de referencia si permanece en 'possible'."""
+        """Return info of the reference glass if it remains in 'possible'."""
         if not self.reference_survives:
             return None
         m = (self.Glass_idx_possible == self.ref_i)
@@ -262,9 +272,9 @@ class Glass_Selector:
         s_ref: float = 30.0
     ):
         """
-        Dibuja el diagrama n–v_d con zoom (inset).
-        - Marca el vidrio de referencia como punto negro (si aplica).
-        - La leyenda del inset muestra nombre + valores n y v_d.
+        Draw the n–v_d diagram with a zoomed inset.
+        - Highlights the reference glass as a black dot (if applicable).
+        - The inset legend shows name + n and v_d values.
         """
 
         def _limits_from(arr_x: np.ndarray, arr_y: np.ndarray, pad_x: float, pad_y: float):
@@ -279,7 +289,7 @@ class Glass_Selector:
         elif vd_all.size:
             x_low, x_high, y_low, y_high = _limits_from(vd_all, n_all, mx, my)
         else:
-            raise ValueError("No hay datos para graficar (vd_all/vd_all_possible vacíos).")
+            raise ValueError("No data to plot (vd_all/vd_all_possible are empty).")
 
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
         ax.scatter(vd_all, n_all, marker='.', alpha=0.35, label='All')
@@ -291,12 +301,12 @@ class Glass_Selector:
         ax.tick_params(axis='both', labelsize=12)
         ax.grid(True, alpha=0.3)
 
-        # invertir X y ticks de n a la derecha
+        # invert X and put n ticks/label on the right
         ax.invert_xaxis()
         ax.yaxis.set_ticks_position('right')
         ax.yaxis.set_label_position('right')
 
-        # rectángulo del zoom (ojo: eje X invertido)
+        # zoom rectangle (note: X axis is inverted)
         rect = patches.Rectangle((x_high, y_low), (x_low - x_high), (y_high - y_low),
                                  linewidth=1.2, edgecolor='red', facecolor='none', linestyle='--')
         ax.add_patch(rect)
@@ -314,7 +324,7 @@ class Glass_Selector:
         axins.yaxis.set_ticks_position('right')
         axins.yaxis.set_label_position('right')
 
-        # localizar referencia (busca primero en 'possible')
+        # find reference (search first in 'possible')
         x_ref = y_ref = None
         label_ref = ""
         if self.ref_i is not None:
@@ -338,50 +348,47 @@ class Glass_Selector:
             axins.legend(loc=inset_legend_loc, fontsize=8, frameon=True, borderpad=0.4,
                          handlelength=1.0, handletextpad=0.5)
 
-        # leyenda sin duplicados
+        # de-duplicate legend
         handles, labels = ax.get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
         ax.legend(by_label.values(), by_label.keys(), loc=legend_loc, fontsize=12)
 
         return fig, ax, axins
-
-def pick_name_universe(selector, prefer: str = "possible"):\
-        
-        """
-        Devuelve (names_array, label) eligiendo dónde buscar el centro:
-        - 'possible' si existe y no está vacía
-        - si no, 'filtered'
-        - si no, 'all'
-        """
-        
-        if prefer == "possible" and getattr(selector, "Names_Glass_possible", None) is not None:
-            if selector.Names_Glass_possible.size:
-                return selector.Names_Glass_possible, "possible"
-        if getattr(selector, "Names_Glass_filtered", None) is not None and selector.Names_Glass_filtered.size:
-            return selector.Names_Glass_filtered, "filtered"
-        
-        return selector.Names_Glass, "all"
+    
+def pick_name_universe(selector, prefer: str = "possible"):
+    """
+    Return (names_array, label) choosing where to search for the center:
+    - 'possible' if it exists and is non-empty
+    - otherwise, 'filtered'
+    - otherwise, 'all'
+    """
+    if prefer == "possible" and getattr(selector, "Names_Glass_possible", None) is not None:
+        if selector.Names_Glass_possible.size:
+            return selector.Names_Glass_possible, "possible"
+    if getattr(selector, "Names_Glass_filtered", None) is not None and selector.Names_Glass_filtered.size:
+        return selector.Names_Glass_filtered, "filtered"
+    return selector.Names_Glass, "all"
     
 def _find_center_index(arr: np.ndarray, center: Any) -> int:
-     """Robusto: exacto → exacto case-insensitive → subcadena case-insensitive."""
-     a = np.asarray(arr)
-     if a.size == 0:
-         raise ValueError("Empty array; cannot find center.")
-     # Igualdad directa
-     idx = np.where(a == center)[0]
-     if idx.size:
-         return int(idx[0])
-     # Strings: case-insensitive y subcadena
-     if a.dtype == object and isinstance(center, str):
-         A = np.array([str(x) for x in a], dtype=object)
-         c = center.casefold()
-         idx = np.where(np.array([x.casefold() == c for x in A]))[0]
-         if idx.size:
-             return int(idx[0])
-         idx = np.where(np.array([c in x.casefold() for x in A]))[0]
-         if idx.size:
-             return int(idx[0])
-     raise ValueError(f"Center value {center!r} not found in provided array.")   
+    """Robust: exact → case-insensitive exact → case-insensitive substring."""
+    a = np.asarray(arr)
+    if a.size == 0:
+        raise ValueError("Empty array; cannot find center.")
+    # direct equality
+    idx = np.where(a == center)[0]
+    if idx.size:
+        return int(idx[0])
+    # strings: case-insensitive and substring
+    if a.dtype == object and isinstance(center, str):
+        A = np.array([str(x) for x in a], dtype=object)
+        c = center.casefold()
+        idx = np.where(np.array([x.casefold() == c for x in A]))[0]
+        if idx.size:
+            return int(idx[0])
+        idx = np.where(np.array([c in x.casefold() for x in A]))[0]
+        if idx.size:
+            return int(idx[0])
+    raise ValueError(f"Center value {center!r} not found in provided array.")   
         
 def centered_windows_safe(
     lists: Sequence[Sequence[Any]],
@@ -390,21 +397,20 @@ def centered_windows_safe(
     return_center_indices: bool = False,
     strict: bool = False,
 ) -> Tuple[List[np.ndarray], Optional[List[int]]]:
-    
     """
-    Ventanas centradas con largo común:
-      - Si target_len > factible, reduce a lo factible (salvo strict=True).
-      - Búsqueda de centros robusta.
+    Centered windows with a common length:
+      - If target_len > feasible, it is reduced to the feasible length (unless strict=True).
+      - Robust center lookup.
     """
     if len(lists) != len(centers):
-        raise ValueError("`lists` y `centers` deben tener la misma longitud.")
+        raise ValueError("`lists` and `centers` must have the same length.")
     arrays = [np.array(seq, dtype=object) for seq in lists]
     if any(len(a) == 0 for a in arrays):
-        raise ValueError("Todas las secuencias deben ser no vacías.")
+        raise ValueError("All input sequences must be non-empty.")
 
     center_indices = [_find_center_index(a, c) for a, c in zip(arrays, centers)]
 
-    # Longitud máxima simétrica por lista
+    # per-list maximum symmetric window length
     max_possible = []
     for a, c in zip(arrays, center_indices):
         left  = c + 1
@@ -417,10 +423,10 @@ def centered_windows_safe(
     else:
         if target_len > feasible_len:
             if strict:
-                raise ValueError(f"target_len={target_len} es muy grande; máximo factible: {feasible_len}")
+                raise ValueError(f"target_len={target_len} is too large; maximum feasible: {feasible_len}")
             L = feasible_len
         elif target_len < 1:
-            raise ValueError("target_len debe ser >= 1")
+            raise ValueError("target_len must be >= 1")
         else:
             L = target_len
 
@@ -436,7 +442,7 @@ def centered_windows_safe(
     cropped = [crop(a, c, L) for a, c in zip(arrays, center_indices)]
     return (cropped, center_indices) if return_center_indices else (cropped, None)    
         
-# ---------- AUTOMATIZADOR PARA n VIDRIOS ----------
+# ---------- AUTOMATOR FOR n GLASSES ----------
 
 def select_and_center_many(
      confi: Any,
@@ -450,23 +456,23 @@ def select_and_center_many(
      plot_each: bool = False,
  ) -> Dict[str, Any]:
      """
-     Crea un Glass_Selector por cada nombre de referencia en `reference_names`,
-     elige el universo adecuado para centrar (possible→filtered→all),
-     y devuelve ventanas centradas de longitud común.
+     Build a Glass_Selector for each reference name in `reference_names`,
+     choose the appropriate universe to center on (possible→filtered→all),
+     and return centered windows with a common length.
  
-     Returns dict con:
+     Returns a dict with:
        - 'selectors': {name: Glass_Selector}
        - 'universes': {name: ('possible'|'filtered'|'all')}
-       - 'name_arrays': [np.ndarray, ...] en el orden de reference_names
-       - 'cropped_names': [np.ndarray, ...] ventanas centradas
-       - 'center_indices': [int, ...] índices del centro en cada arreglo base
-       - 'feasible_len': int longitud final usada
+       - 'name_arrays': [np.ndarray, ...] in the order of reference_names
+       - 'cropped_names': [np.ndarray, ...] centered windows
+       - 'center_indices': [int, ...] center indices in each base array
+       - 'feasible_len': int effective length used
      """
      selectors = {}
      universes = {}
      name_arrays: List[np.ndarray] = []
  
-     # Construir selectores
+     # Build selectors
      for ref in reference_names:
          sel = Glass_Selector(
              confi, WR=WR, name_glass=ref,
@@ -478,11 +484,11 @@ def select_and_center_many(
          name_arrays.append(names_arr)
  
          if plot_each:
-             print(f"\n[{ref}] Universo: {where} | Candidatos nv: {sel.Glass_idx_filtered.size} | Posibles: {sel.Glass_idx_possible.size}")
+             print(f"\n[{ref}] Universe: {where} | nv candidates: {sel.Glass_idx_filtered.size} | Possible: {sel.Glass_idx_possible.size}")
              fig, ax, axins = sel.plot_nv_with_inset(title=f"n-vd around '{ref}'")
              plt.show()
  
-     # Centrar ventanas por nombre de referencia
+     # Center windows by reference name
      cropped, center_indices = centered_windows_safe(
          name_arrays,
          centers=list(reference_names),
@@ -491,7 +497,7 @@ def select_and_center_many(
          strict=False
      )
  
-     # Longitud efectiva usada
+     # Effective length used
      if len(cropped):
          feasible_len = len(cropped[0])
      else:
@@ -626,6 +632,7 @@ print("Nombres posibles:", selector_F2.Names_Glass_possible)
 
 fig, ax, axins = selector_F2.plot_nv_with_inset()
 plt.show()
+
 
 
 
