@@ -621,23 +621,24 @@ result = select_and_center_many(
     pt_threshold = 0.8,
     prefer_universe = "possible",   # si no está en possible, cae a filtered → all
     target_len = 15,
-    plot_each = True              # pon True para una figura por vidrio
+    plot_each = True                # True para una figura por vidrio
 )
 
 # Resumen
-print("\nUniversos elegidos por vidrio:")
-for ref, where in result["universes"].items():
+print("\nConjunto elegidos por vidrio:")
+for ref, where in result["Conjunto"].items():
     print(f"  {ref}: {where}")
 
-print("\nÍndices de centro (por arreglo base en el universo elegido):")
+print("\nÍndices de centro (por arreglo base al conjunto elegido):")
 for ref, idx in zip(refs, result["center_indices"]):
     print(f"  {ref}: {idx}")
 
-print(f"\nLongitud efectiva usada para todas las ventanas: {result['feasible_len']}")
+print(f"\nLongitud efectiva de los arreglos: {result['feasible_len']}")
 
-print("\nVentanas centradas (por vidrio):")
+print("\nListas centradas (por vidrio):")
 for ref, win in zip(refs, result["cropped_names"]):
     print(f"  {ref}: {list(win)}")
+
 
 
 
