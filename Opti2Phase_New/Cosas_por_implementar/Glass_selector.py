@@ -437,73 +437,68 @@ def centered_windows_safe(
         
 # ---------- AUTOMATOR FOR n GLASSES ----------
 
+
 def select_and_center_many(
-     confi: Any,
-     reference_names: Sequence[str],
-     WR: Tuple[float, float] = (0.34, 1.10),
-     delta_n: float = 0.025,
-     delta_vd: float = 5.0,
-     pt_threshold: float = 0.8,
-     prefer_universe: str = "possible",
-     target_len: Optional[int] = 15,
-     plot_each: bool = False,
- ) -> Dict[str, Any]:
-     """
-     Build a Glass_Selector for each reference name in `reference_names`,
-     choose the appropriate universe to center on (possible→filtered→all),
-     and return centered windows with a common length.
- 
-     Returns a dict with:
-       - 'selectors': {name: Glass_Selector}
-       - 'universes': {name: ('possible'|'filtered'|'all')}
-       - 'name_arrays': [np.ndarray, ...] in the order of reference_names
-       - 'cropped_names': [np.ndarray, ...] centered windows
-       - 'center_indices': [int, ...] center indices in each base array
-       - 'feasible_len': int effective length used
-     """
-     selectors = {}
-     universes = {}
-     name_arrays: List[np.ndarray] = []
- 
-     # Build selectors
-     for ref in reference_names:
-         sel = Glass_Selector(
-             confi, WR=WR, name_glass=ref,
-             delta_n=delta_n, delta_vd=delta_vd, pt_threshold=pt_threshold
-         )
-         selectors[ref] = sel
-         names_arr, where = pick_name_universe(sel, prefer=prefer_universe)
-         universes[ref] = where
-         name_arrays.append(names_arr)
- 
-         if plot_each:
-             print(f"\n[{ref}] Universe: {where} | nv candidates: {sel.Glass_idx_filtered.size} | Possible: {sel.Glass_idx_possible.size}")
-             fig, ax, axins = sel.plot_nv_with_inset(title=f"n-vd around '{ref}'")
-             plt.show()
- 
-     # Center windows by reference name
-     cropped, center_indices = centered_windows_safe(
-         name_arrays,
-         centers=list(reference_names),
-         target_len=target_len,
-         return_center_indices=True,
-         strict=False
-     )
- 
-     # Effective length used
-     if len(cropped):
-         feasible_len = len(cropped[0])
-     else:
-         feasible_len = 0
- 
-     return {
-         "selectors": selectors,
-         "universes": universes,
-         "name_arrays": name_arrays,
-         "cropped_names": cropped,
-         "center_indices": center_indices,
-         "feasible_len": feasible_len,
-     }   
+    confi: Any,
+    reference_names: Sequence[str],
+    WR: Tuple[float, float] = (0.34, 1.10),
+    delta_n: float = 0.025,
+    delta_vd: float = 5.0,
+    pt_threshold: float = 0.8,
+    prefer_set: str = "possible",
+    target_len: Optional[int] = 15,
+    plot_each: bool = False,
+) -> Dict[str, Any]:
+    """
+    Build a Glass_Selector for each name in `reference_names`,
+    choose the appropriate set to center on (possible→filtered→all),
+    and return centered windows with a common length.
+
+    Returns a dict with:
+      - 'selectors': {name: Glass_Selector}
+      - 'set_available': {name: ('possible'|'filtered'|'all')}
+      - 'name_arrays': [np.ndarray, ...] in the order of reference_names
+      - 'cropped_names': [np.ndarray, ...] centered windows
+      - 'center_indices': [int, ...] center indices in each base array
+      - 'feasible_len': int effective length used
+    """
+    selectors: Dict[str, Any] = {}
+    set_available: Dict[str, str] = {}
+    name_arrays: List[np.ndarray] = []
+
+    for ref in reference_names:
+        sel = Glass_Selector(
+            confi, WR=WR, name_glass=ref,
+            delta_n=delta_n, delta_vd=delta_vd, pt_threshold=pt_threshold
+        )
+        selectors[ref] = sel
+        names_arr, where = pick_name_universe(sel, prefer=prefer_set)
+        set_available[ref] = where
+        name_arrays.append(names_arr)
+
+        if plot_each:
+            print(f"\n[{ref}] Available set: {where} | nv candidates: {sel.Glass_idx_filtered.size} | Possible: {sel.Glass_idx_possible.size}")
+            fig, ax, axins = sel.plot_nv_with_inset(title=f"n-vd around '{ref}'")
+            plt.show()
+
+    cropped, center_indices = centered_windows_safe(
+        name_arrays,
+        centers=list(reference_names),
+        target_len=target_len,
+        return_center_indices=True,
+        strict=False
+    )
+
+    feasible_len = len(cropped[0]) if len(cropped) else 0
+
+    return {
+        "selectors": selectors,
+        "set_available": set_available,   # <-- ahora coincide con tu print
+        "name_arrays": name_arrays,
+        "cropped_names": cropped,
+        "center_indices": center_indices,
+        "feasible_len": feasible_len,
+    }
             
         
 # _________________________________________#
@@ -631,6 +626,7 @@ print(f"\nLongitud efectiva de los arreglos: {result['feasible_len']}")
 print("\nListas centradas (por vidrio):")
 for ref, win in zip(refs, result["cropped_names"]):
     print(f"  {ref}: {list(win)}")
+
 
 
 
