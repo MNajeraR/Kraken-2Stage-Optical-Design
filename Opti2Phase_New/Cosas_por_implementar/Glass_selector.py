@@ -596,7 +596,6 @@ configuracion_1 = Kos.Setup()
 
 a = len(configuracion_1.NAMES)
 
-                
 # Lista de vidrios de referencia 
 refs = ["S-FPL51", "F8", "BK7", "S-FPL53"]
 
@@ -607,14 +606,14 @@ result = select_and_center_many(
     delta_n = 0.025,
     delta_vd = 5.0,
     pt_threshold = 0.8,
-    prefer_universe = "possible",   # si no está en possible, cae a filtered → all
+    prefer_set = "possible",   # si no está en possible, cae a filtered → all
     target_len = 15,
     plot_each = True                # True para una figura por vidrio
 )
 
 # Resumen
 print("\nConjunto elegidos por vidrio:")
-for ref, where in result["Conjunto"].items():
+for ref, where in result["set_available"].items():
     print(f"  {ref}: {where}")
 
 print("\nÍndices de centro (por arreglo base al conjunto elegido):")
@@ -626,6 +625,7 @@ print(f"\nLongitud efectiva de los arreglos: {result['feasible_len']}")
 print("\nListas centradas (por vidrio):")
 for ref, win in zip(refs, result["cropped_names"]):
     print(f"  {ref}: {list(win)}")
+
 
 
 
