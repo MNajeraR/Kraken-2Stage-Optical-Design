@@ -27,9 +27,58 @@ import KrakenOS as Kos
 import matplotlib.patches as patches
 
 
+#########################################################################################################
 
 
+def Set_Initial_Radius(Phi, n, d):
+    """
+    Computes the initial radii R1 and R2 for a thick symmetric lens (R2 = -R1),
+    given the lens power (Phi), refractive index (n), and center thickness (d).
 
+    Parameters
+    ----------
+    Phi : float
+        Lens power (1/length units).
+        Note: Make sure the sign convention for Phi is consistent:
+              positive for converging lenses, negative for diverging lenses.
+    n : float
+        Refractive index of the lens material.
+    d : float
+        Center thickness of the lens (same units as used for R, e.g., mm).
+
+    Returns
+    -------
+    tuple (R1, R2)
+        Selected radii of curvature from the quadratic solution.
+        The radius with the larger absolute value (smaller curvature) is chosen.
+    """
+
+   
+    Phi = -Phi
+
+    # Discriminant check
+    disc = 1.0 - (Phi * d) / n
+    if disc < -1e-12:
+        raise ValueError("No real solution: condition Phi*d <= n is violated.")
+    disc = max(disc, 0.0)  # prevent small negative values due to rounding
+    sqrt_disc = math.sqrt(disc)
+
+    denom = (n - 1.0) * d
+    if denom == 0:
+        raise ZeroDivisionError("Denominator n-1 or d equals zero; check parameters.")
+
+    # Two possible curvature solutions
+    C_plus  = (n / denom) * (1.0 + sqrt_disc)
+    C_minus = (n / denom) * (1.0 - sqrt_disc)
+
+    # Convert to radii
+    R1_plus, R1_minus = 1.0 / C_plus, 1.0 / C_minus
+
+    # Select the radius with the largest absolute value
+    R1_selected = R1_plus if abs(R1_plus) > abs(R1_minus) else R1_minus
+    R2_selected = -R1_selected
+
+    return R1_selected, R2_selected
 
 #########################################################################################################
 
@@ -1351,6 +1400,7 @@ def data_exists(data):
             if row == data:
                 return True
     return False
+
 
 
 
