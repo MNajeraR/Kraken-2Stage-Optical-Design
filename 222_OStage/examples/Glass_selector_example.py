@@ -2,10 +2,10 @@
 
 # -*- coding: utf-8 -*-
 
-"""Examp Doublet Lens 3D color"""
+from pathlib import Path
+import sys
 
-
-
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pkg_resources
 
