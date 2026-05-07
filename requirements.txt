@@ -1,6 +1,9 @@
-NumPy, version 1.22.1
-SciPy, version 1.7.3
-PyGAD, version 3.0.1 — https://pygad.readthedocs.io/en/latest/#
-bees-algorithm, version 1.0.2 — https://pypi.org/project/bees-algorithm
-KrakenOS, version 1.0.0.19 — https://github.com/Garchupiter/Kraken-Optical-Simulator
-matplotlib, version 3.5.2
+numpy==1.22.1
+scipy==1.7.3
+pygad==3.0.1
+bees-algorithm==1.0.2
+matplotlib==3.5.2
+
+# External requirement:
+# KrakenOS v1.0.0.19
+# https://github.com/Garchupiter/Kraken-Optical-Simulator
