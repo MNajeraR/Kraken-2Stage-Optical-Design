@@ -5,6 +5,11 @@ Created on Wed Nov 19 15:58:40 2025
 @author: MORGANRHAINAJERAROA
 """
 
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 import numpy as np
 import pkg_resources
