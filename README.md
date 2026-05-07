@@ -35,6 +35,7 @@ The scripts follow the naming convention:
 
 ```text
 PGMF_k_Optimization_jL_Focal_Reducer_Chi.py
+```
 
 where:
 
