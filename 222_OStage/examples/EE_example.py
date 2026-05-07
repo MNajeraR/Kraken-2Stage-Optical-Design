@@ -200,14 +200,14 @@ name_save = f"Example_{L1a.Glass}_{L2a.Glass}"
 List_Radius, meta = run_spots_for_fields(
     Pup, Rays, Field_ccd, RW,
     xairy, yairy, name_save=name_save, ptype="hexapolar",
-    save=False, show = False, show_geo_circle=False,
+    save=False, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'Images\SPT_Diagrams_New')
+    box_include_airy=False, save_dir = 'figures\SPT_Diagrams')
 
 
 EE_Example_information = plot_all_EE_for_fields(
-                            Pup, Rays, Field_ccd, RW, save_dir='Images\EE_Diagrams_New',
-                            show_r50 = True, save = True,  show=True,
+                            Pup, Rays, Field_ccd, RW, save_dir='figures\EE_Diagrams',
+                            show_r50 = True, save = False,  show=True,
                             filename=f"EE_Example_{L1a.Glass}_{L2a.Glass}=.pdf",
                             airy_radius_um=Rairy*1000.,
                             multiply_by_diff_limit=True
