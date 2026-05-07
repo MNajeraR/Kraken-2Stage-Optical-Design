@@ -62,7 +62,13 @@ def read_parameters(file_path):
 
     return params
 
-file_path =  f"Optimized_Parameters/Third_Order_Parameters_{glass_tag}_Ch1.txt"
+optimizedparameters_ROOT = Path(__file__).resolve().parents[1]
+
+file_path = (
+    optimizedparameters_ROOT
+    / "optimized_parameters"
+    / f"Third_Order_Parameters_{glass_tag}_Ch1.txt"
+)
 
 Third_Order_Params = read_parameters(file_path)
 
