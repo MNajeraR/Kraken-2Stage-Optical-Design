@@ -131,150 +131,6 @@ def radius_at_fraction(r, EE, frac):
     return np.interp(frac, EE, r)
 
 
-
-# def plot_all_EE_for_fields(
-#     Pup, Rays, Field_ccd, wavelengths, *,
-#     fields=None, ptype="hexapolar", show_r50=True,
-#     save=False,                     #  Guarda solo si True
-#     save_dir=None,                  #  Carpeta destino (default EE_Diagrams)
-#     filename=None,                  #  Nombre del archivo (sin ruta)
-#     show=False,                     #  Muestra en pantalla si True
-# ):
-#     """
-#     Grafica EE(r) para todos los campos en una sola figura (opcionalmente).
-#     - fields: lista [(fx_deg, fy_deg, name), ...]; si None se usa set por defecto.
-#     - show_r50: si True, marca r50 de cada campo con una marca y líneas guía.
-#     - save: si True, guarda la figura en save_dir/filename (PDF/PNG según extensión).
-#     - save_dir: carpeta de salida (por defecto <raiz_proyecto>/EE_Diagrams).
-#     - filename: nombre del archivo (p.ej. 'EE_S-FPL51_F2HT_fields.pdf').
-#     - show: si True, hace plt.show().
-#     Retorna: lista de r50 por campo (en µm).
-#     """
-
-#     # 1) Campos por defecto (en grados)
-#     theta_deg = float(np.rad2deg(Field_ccd))
-#     if fields is None:
-#         fields = [
-#             (0.0,        0.0,        "Field_0"),
-#             (theta_deg,  0.0,        "Field_1"),
-#             (0.0,       -theta_deg,  "Field_2"),
-#             (theta_deg, -theta_deg,  "Field_3"),
-#         ]
-
-#     # 2) Guardar estado original del pupil
-#     _orig_ptype = getattr(Pup, "Ptype", None)
-#     _orig_fx    = getattr(Pup, "FieldX", None)
-#     _orig_fy    = getattr(Pup, "FieldY", None)
-
-#     curves = []   # [(name, r_um, EE(0..1), r50_um)]
-#     try:
-#         Pup.Ptype = ptype
-#         for fx_deg, fy_deg, name in fields:
-#             Pup.FieldX, Pup.FieldY = float(fx_deg), float(fy_deg)
-
-#             traced = trace_rays(Pup, wavelengths, Rays)
-#             (Xa, Ya, *_), (Xb, Yb, *_), (Xc, Yc, *_) = traced
-
-#             X_all = np.concatenate([Xa, Xb, Xc]).astype(float)
-#             Y_all = np.concatenate([Ya, Yb, Yc]).astype(float)
-
-#             # Centro geométrico y recentrado
-#             h, k = calculate_geometrical_center(X_all, Y_all)
-#             X_all -= h; Y_all -= k
-
-#             # # EE
-            
-#             # Radios 
-#             r_dist = np.hypot(X_all, Y_all)
-        
-#             # 1) EE exacta PARA MÉTRICAS (r50, etc.)
-#             r_sorted_exact, EE_exact = encircled_energy(r_dist)
-#             r_um_exact = 1000.0 * r_sorted_exact
-#             r50_um = radius_at_fraction(r_um_exact, EE_exact, 0.50)
-        
-#             # 2) EE SUAVE 
-#             r_grid, EE_smooth = encircled_energy_kde(r_dist, n_points=512, r_factor=1.1)
-#             r_um_smooth = 1000.0 * r_grid
-        
-#             curves.append((name, r_um_smooth, EE_smooth, r50_um))
-
-#     finally:
-#         # restaurar estado del pupil
-#         if _orig_ptype is not None: Pup.Ptype  = _orig_ptype
-#         if _orig_fx    is not None: Pup.FieldX = _orig_fx
-#         if _orig_fy    is not None: Pup.FieldY = _orig_fy
-
-#     # Si no se va a mostrar ni guardar, no generes la figura
-#     if not show and not save:
-#         return [c[3] for c in curves]
-
-#     # 3) Figura única con todas las curvas
-#     # Encontrar el radio máximo global donde las curvas llegan a 100 %
-#     r100_list = [c[1][-1] for c in curves]   # último r_um de cada curva
-#     global_r100 = max(r100_list)
-    
-#     fig, ax = plt.subplots(figsize=(13, 9.0))
-#     r_50_set = []
-#     for name, r_um, EE, r50_um in curves:
-#         # Copias para poder extender
-#         r_plot  = np.array(r_um, copy=True)
-#         EE_plot = np.array(EE, copy=True) * 100.0
-    
-#         # Si este campo llega a 100% antes que el máximo global,
-#         # añadimos un tramo horizontal hasta global_r100.
-#         if r_plot[-1] < global_r100:
-#             r_plot  = np.append(r_plot,  global_r100)
-#             EE_plot = np.append(EE_plot, EE_plot[-1])  # sigue al 100%
-    
-#         ax.plot(r_plot, EE_plot, label=fr"{r50_um:.2f} µm", lw=6)
-    
-#         if show_r50:
-#             ax.plot([r50_um], [50], marker="o")
-#             ax.hlines(y=50, xmin=0, xmax=r50_um,
-#                       linestyles="--", linewidth=1.5, alpha=0.6)
-#             ax.vlines(x=r50_um, ymin=0, ymax=50,
-#                       linestyles="--", linewidth=1.5, alpha=0.6)
-#         r_50_set.append(r50_um)
-        
-#     for spine in ax.spines.values():
-#         spine.set_linewidth(2)
-
-#     ax.tick_params(axis='both', which='major', labelsize=25, length=6, width=3)
-#     ax.set_xlim(0, global_r100)
-#     ax.set_ylim(0, 102)
-#     ax.set_xlabel("Radius (µm)", fontsize=25, fontfamily="serif", fontname="Times New Roman")
-#     ax.set_ylabel("Encircled Energy (%)", fontsize=25, fontfamily="serif", fontname="Times New Roman")
-#     ax.grid(True, alpha=0.3)
-#     ax.legend(title="Field", ncol=2,
-#               prop={"family": "serif", "size": 20},
-#               title_fontsize=22)
-
-#     plt.tight_layout()
-
-#     # Guardar si se pidió
-#     if save:
-#         if save_dir is None:
-#             # raíz del proyecto / EE_Diagrams
-#             script_dir = os.path.abspath(os.path.dirname(__file__))
-#             base_path  = os.path.abspath(os.path.join(script_dir, '..', '..'))
-#             save_dir   = os.path.join(base_path, 'Images\EE_Diagrams')
-#         Path(save_dir).mkdir(parents=True, exist_ok=True)
-
-#         if filename is None:
-#             filename = "EE_fields.pdf"  # por defecto
-#         save_path = os.path.join(save_dir, filename)
-#         fig.savefig(save_path, dpi=150)
-#         print(f"[saved] {save_path}")
-
-#     if show:
-#         plt.show()
-#     else:
-#         plt.close(fig)
-
-#     return r_50_set
-
-
-
 def plot_all_EE_for_fields(
     Pup, Rays, Field_ccd, wavelengths, *,
     fields=None, ptype="hexapolar", show_r50=True,
@@ -487,13 +343,15 @@ def plot_all_EE_for_fields(
     
    plt.tight_layout()
     
-   # Guardar si se pidió
+   # Save figures if requested
    if save:
         if save_dir is None:
-            # raíz del proyecto / EE_Diagrams
-            script_dir = os.path.abspath(os.path.dirname(__file__))
-            base_path  = os.path.abspath(os.path.join(script_dir, '..', '..'))
-            save_dir   = os.path.join(base_path, 'Images', 'EE_Diagrams')
+            # Directory where the current script is located
+            script_dir = Path(__file__).resolve().parent
+    
+            # Create local figures directory
+            save_dir = script_dir / "figures" / "EE_Diagrams"
+    
         Path(save_dir).mkdir(parents=True, exist_ok=True)
     
         if filename is None:
