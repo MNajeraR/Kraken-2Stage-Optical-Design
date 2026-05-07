@@ -35,3 +35,36 @@ The scripts follow the naming convention:
 
 ```text
 PGMF_k_Optimization_jL_Focal_Reducer_Chi.py
+
+where:
+
+- `k` indicates the optimization method: `LS`, `MC`, `GA`, or `ABC`.
+- `j` indicates the number of lenses: `2L` or `3L`.
+- `Chi` indicates the spectral channel for the three-lens configuration, with `i = 1, 2, 3`.
+
+For the two-lens configuration, only the blue channel is considered. For the three-lens configuration, the optimization methods are applied to one channel at a time.
+
+### `second_stage/`
+
+This folder contains the scripts for the second optimization stage, focused on image-quality refinement.
+
+For the three-lens configuration, scripts are provided for the three channels. For the two-lens configuration, only the blue channel is considered.
+
+### `Results/`
+
+This folder stores the results of the glass optimization and filtering process. The script `Metrics_Glasses_Selector.py` is used to classify and evaluate candidate glasses.
+
+### `Optimized_Parameters/`
+
+This folder stores the optimized parameters obtained at each stage of the workflow.
+
+### `images/`
+
+This folder stores spot diagrams and enclosed energy plots generated during the glass optimization and the different optimization stages.
+
+### `utils/`
+
+This folder contains reusable classes and equations used across the scripts.
+
+- `utils/equations/`: mathematical formulations and auxiliary equations.
+- `utils/classes/`: reusable classes, including the `GlassXtractor` tool.
