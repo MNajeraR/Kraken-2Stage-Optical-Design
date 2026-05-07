@@ -66,9 +66,9 @@ This folder stores spot diagrams and enclosed energy plots generated during the 
 ### `utils/`
 
 This folder contains reusable classes and equations used across the scripts.
+- `utils/equations/`: mathematical formulations and auxiliary equations.
+- `utils/classes/`: reusable classes, including the `GlassXtractor` tool.
 
 ## License
 
 This project is licensed under the GNU GPL v3.0 License.
-- `utils/equations/`: mathematical formulations and auxiliary equations.
-- `utils/classes/`: reusable classes, including the `GlassXtractor` tool.
