@@ -1,0 +1,14 @@
+L1=FCD1B  L2=E-F1
+Final Seidel Aberrations:
+  Spherical = -20.92
+  Coma      = -8.95
+  Astig     = 13.76
+  CLon      = 13.73
+EFFL = 9127.202655 mm
+MS_d = -2.20101e-05
+Airy's disk comparison with GEO and RMS:
+  GEO/Airy = 39.58
+  RMS/Airy = 20.38
+GEO_R_avg_mm = 88.119597
+RMS_R_avg_mm = 45.384903
+EE_info = [21.185159470095083, 34.85736972705042, 34.90481524994495, 55.78260149411602]

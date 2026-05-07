@@ -1,0 +1,11 @@
+{"L1": "BAF2", "L2": "LZ_F1", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "PBM3", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "E-F3", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "F3", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "C04-38", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "F14HT", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "PBM18Y", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "F8", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "F8HT", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "PBM8Y", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}
+{"L1": "BAF2", "L2": "BAFD3", "W_um": 0.43032015, "error": "ValueError: The number of arms can only be 6, 8, 10, or 12"}

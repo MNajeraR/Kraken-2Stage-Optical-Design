@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: "Kraken-2Stage-Optical-Design"
+message: "If you use this repository, please cite it."
+
+type: software
+
+authors:
+  - family-names: "Nájera"
+    given-names: "Morgan R."
+
+license: GPL-3.0
+
+repository-code: "https://github.com/TU_USER/TU_REPO"
+
+version: "1.0.0"

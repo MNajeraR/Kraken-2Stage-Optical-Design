@@ -1,0 +1,14 @@
+L1=CALCITE-E  L2=BAFD1
+Final Seidel Aberrations:
+  Spherical = -17.52
+  Coma      = -8.93
+  Astig     = 10.01
+  CLon      = 20.29
+EFFL = 9127.202505 mm
+MS_d = -3.79137e-06
+Airy's disk comparison with GEO and RMS:
+  GEO/Airy = 56.64
+  RMS/Airy = 29.24
+GEO_R_avg_mm = 126.115288
+RMS_R_avg_mm = 65.111133
+EE_info = [37.15104020780313, 50.01797227011477, 49.91957023887232, 84.05517235893454]
