@@ -30,6 +30,12 @@ Dependencies:
 # ===============================
 #      Library Imports
 # ===============================
+
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 import numpy as np
 import pkg_resources
@@ -420,11 +426,11 @@ List_Radius, meta = run_spots_for_fields(
     xairy, yairy, name_save=name_save, ptype="hexapolar",
     save=True, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'Images\SPT_Diagrams_New')
+    box_include_airy=False, save_dir = 'figures\SPT_Diagrams\Ch1_2L')
 
 
 EE_Example_information = plot_all_EE_for_fields(
-                            Pup, Rays, Field_ccd, RW, save_dir='Images\EE_Diagrams_New',
+                            Pup, Rays, Field_ccd, RW, save_dir='figures\EE_Diagrams\Ch1_2L',
                             show_r50 = True, save = True,  show=True,
                             filename=f"EE_NOP_Classic_{L1a.Glass}_{L2a.Glass}_fields.pdf"
                             )   
