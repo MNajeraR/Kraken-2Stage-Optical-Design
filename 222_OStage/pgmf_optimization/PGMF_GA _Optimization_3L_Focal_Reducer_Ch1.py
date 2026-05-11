@@ -13,7 +13,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import time
 import numpy as np
 import pkg_resources
-import os
 
 
 # Import KrakenOS and custom modules
@@ -309,7 +308,7 @@ Pup.FieldX = np.rad2deg(Field_ccd) # Field value in degrees on the X-axis
 
 
 # PGMF LS EFFL
-EFFL_3O = Telescope_f85_FR.EFFL 
+EFFL_PGMF_LS = Telescope_f85_FR.EFFL 
 
 # ======================================
 #    Aberration Analysis Setup
@@ -347,7 +346,7 @@ print(f"Astigmatism Aberration (0.0, -0.071) deg: {Aberration.Astigmatism(1, [0.
 print(f"Chromatic Aberration (0.071, 0.071) deg: {Aberration.Chromatic(1, [0.0, 0.0])[1]*(1000/W):.2f}")
 print(f"Spherical Aberration (0.071, -0.071) deg: {Aberration.Spheric(1, [0.0, 0.0])[1]*(1000/W):.2f}")
 print(f"Coma Aberration (0.071, -0.071) deg: {Aberration.Coma(1, [0,-Field_ccd])[1]*(1000/W):.2f}")
-print(f"Effective Focal Length: {EFFL_3O:.2f}")
+print(f"Effective Focal Length: {EFFL_PGMF_LS:.2f}")
 print("======================================")
 print('')
 
