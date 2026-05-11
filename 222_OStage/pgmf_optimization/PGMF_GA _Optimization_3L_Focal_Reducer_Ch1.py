@@ -487,16 +487,23 @@ system, deltaZ = BestFocus(all_points_x, all_points_y, all_points_z,
 
 Set_PGMF_LS_OP_Opt = [R1, R2, R3, R4, R5, R6, d5+deltaZ]
 
-folder_name = "Optimized_Parameters"
-os.makedirs(folder_name, exist_ok=True)
+output_dir = optimizedparameters_ROOT / "optimized_parameters"
+output_dir.mkdir(parents=True, exist_ok=True)
 
-
-file_path = os.path.join(folder_name,f"PGMF_GA_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}.txt")
+file_path = (
+    output_dir
+    / f"PGMF_GA_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch1.txt"
+)
 
 with open(file_path, "w", encoding="utf-8") as f:
-    f.write(f"PGMF_GA_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}= [\n")
+
+    f.write(
+        f"PGMF_GA_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch1= [\n"
+    )
+
     for value in Set_PGMF_LS_OP_Opt:
-        f.write(f"{value:.8f},\n")  
+        f.write(f"{value:.8f},\n")
+
     f.write("]\n")
 
 print(f"[ok] Archivo '{file_path}' guardado con los valores actuales.")
@@ -576,11 +583,11 @@ List_Radius, meta = run_spots_for_fields(
     xairy, yairy, name_save=name_save, ptype="hexapolar",
     save=True, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'Images\SPT_Diagrams_Article')
+    box_include_airy=False, save_dir = 'figures\SPT_Diagrams\Ch1')
 
 
 EE_Example_information = plot_all_EE_for_fields(
-                            Pup, Rays, Field_ccd, RW, save_dir='Images\EE_Diagrams_Article',
+                            Pup, Rays, Field_ccd, RW, save_dir='figures\EE_Diagrams\Ch1',
                             show_r50 = True, save = True,  show=True,
                             filename=f"EE_PGMF_Three_Lens_GA_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}.pdf"
                             )   
