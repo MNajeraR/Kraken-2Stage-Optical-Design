@@ -1,7 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov 19 15:58:40 2025
+
+@author: MORGANRHAINAJERAROA
+"""
+
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 import numpy as np
 import pkg_resources
 import os
+
 
 # Import KrakenOS and custom modules
 from utils import (Paraxial_Cal, Gaussian_Quadrature, BestFocus,
@@ -20,6 +33,45 @@ if missing:
 
 import KrakenOS as Kos
 import pygad
+
+# ===============================
+# ===============================
+
+Glass = 'K-PFK85 & ADF355 & K-PFK85'
+# Glass = 'S-FPL51 & F2HT & S-FPL51'
+
+glass_tag = Glass.replace(" ", "").replace("&", "_")
+Glass_list = [g.strip() for g in Glass.split('&')]
+
+def read_parameters(file_path):
+    params = []
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+
+            # Ignorar comentarios y líneas vacías
+            if not line or line.startswith("#"):
+                continue
+
+            # Ignorar corchetes y encabezado
+            if "[" in line or "]" in line or "=" in line:
+                continue
+
+            # Convertir a float
+            params.append(float(line.replace(",", "")))
+
+    return params
+
+optimizedparameters_ROOT = Path(__file__).resolve().parents[1]
+
+file_path = (
+    optimizedparameters_ROOT
+    / "optimized_parameters"
+    / f"PGMF_LS_Parameters_{glass_tag}_Ch1.txt"
+)
+
+PGMF_LS_Params = read_parameters(file_path)
 # ===============================
 #    Constants Definition
 # ===============================
@@ -256,7 +308,7 @@ Pup.FieldType = "angle"   # Field type, this in terms of object height and dista
 Pup.FieldX = np.rad2deg(Field_ccd) # Field value in degrees on the X-axis
 
 
-# Third Order EFFL
+# PGMF LS EFFL
 EFFL_3O = Telescope_f85_FR.EFFL 
 
 # ======================================
