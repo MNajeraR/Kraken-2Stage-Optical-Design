@@ -468,7 +468,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     
     List_Radius_raw = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}"
+    name_save=f"Third_Order_{save_prefix}",save_dir='figures\SPT_Diagrams_Glasses'
     )
     
     # Convert output to a consistent 2-column array: [GEO, RMS]
