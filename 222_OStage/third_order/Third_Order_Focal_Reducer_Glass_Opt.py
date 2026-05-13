@@ -103,7 +103,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     if save_prefix is None:
         save_prefix = f"{safe_name(glass_a)}_{safe_name(glass_b)}"
     results_dir = PROJECT_ROOT / "results"
-    ee_dir = PROJECT_ROOT / "figures" / "EE_Diagrams"
+    ee_dir =  "figures" / "EE_Diagrams_Glasses_optimization"
     ensure_dirs(results_dir, ee_dir)
     
     # ---------- Paraxial setup ----------
@@ -466,13 +466,13 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     
     wavelengths = [AB.Wf, W, AB.Wc]
     
-    List_Radius = run_spots_for_fields(
+    List_Radius_raw = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}",save_dir=PROJECT_ROOT / "figures" / "SPT_Diagrams"
+    name_save=f"Third_Order_{save_prefix}",save_dir= "figures" / "SPT_Diagrams_Glasses_optimization"
     )
-    print(List_Radius)
-    List_Radius = np.asarray(List_Radius, dtype=float)
-
+    List_Radius = np.asarray(List_Radius_raw[0], dtype=float)
+    spot_metadata = List_Radius_raw[1]
+    
     GEO_R_average = float(np.average(List_Radius[:, 0] * 1000))
     RMS_R_average = float(np.average(List_Radius[:, 1] * 1000))
 
@@ -516,7 +516,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
         f.write(f"GEO_R_avg_mm = {GEO_R_average:.6f}\n")
         f.write(f"RMS_R_avg_mm = {RMS_R_average:.6f}\n")
         f.write(f"EE_info = {EE_Example_information}\n")
-
+        f.write(f"Spot metadata = {spot_metadata}\n")
   
     return {
         "L1": str(glass_a),
