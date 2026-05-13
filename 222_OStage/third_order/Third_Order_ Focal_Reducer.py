@@ -29,21 +29,22 @@ Dependencies:
 #      Library Imports
 # ===============================
 
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 import numpy as np
 import pkg_resources
 import scipy
-import os
-
-
-
 import matplotlib.pyplot as plt
 
 # Import KrakenOS and custom modules
-from utils import (Paraxial_Cal, ThirdOrder_Cal, analyze_ranked, 
+from utils import (Paraxial_Cal, ThirdOrder_Cal, 
                    Set_Initial_Radius, apply_system_actualization, configure_and_trace,  
                    Prin_Plane, run_spots_for_fields, seidel_terms, airy_data, 
-                   configure_pupil_and_ab, set_pair_glass, plot_all_EE_for_fields) 
+                   configure_pupil_and_ab, plot_all_EE_for_fields) 
                     
 
 # Check if KrakenOS is installed, otherwise append its path
@@ -352,16 +353,25 @@ Set_Initial_Opt = [R_1, R_2, R_3, R_4, d4]
 #  Save Parameters
 # ======================================
 
-folder_name = "Optimized_Parameters"
-os.makedirs(folder_name, exist_ok=True)
 
+optimizedparameters_ROOT = Path(__file__).resolve().parents[1]
+output_dir = optimizedparameters_ROOT / "optimized_parameters"
+output_dir.mkdir(parents=True, exist_ok=True)
 
-file_path = os.path.join(folder_name,f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}.txt")
+file_path = (
+    output_dir
+    / f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}.txt"
+)
 
 with open(file_path, "w", encoding="utf-8") as f:
-    f.write(f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}= [\n")
+
+    f.write(
+        f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}= [\n"
+    )
+
     for value in Set_Initial_Opt:
-        f.write(f"{value:.8f},\n")  
+        f.write(f"{value:.8f},\n")
+
     f.write("]\n")
 
 print(f"[ok] Archivo '{file_path}' guardado con los valores actuales.")
@@ -449,12 +459,12 @@ List_Radius, meta = run_spots_for_fields(
     xairy, yairy, name_save=name_save, ptype="hexapolar",
     save=True, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'Images\SPT_Diagrams_CT')
+    box_include_airy=False, save_dir = 'figures\SPT_Diagrams\Ch1_2L')
 
 
 EE_Example_information = plot_all_EE_for_fields(
                             Pup, Rays, Field_ccd, RW,
-                            show_r50 = True, save = True, save_dir='Images\EE_Diagrams_CT',
+                            show_r50 = True, save = True, save_dir='figures\EE_Diagrams\Ch1_2L',
                             show=True,
                             filename=f"EE_{L1a.Glass}_{L2a.Glass}_fields.pdf",
                             # airy_radius_um=Rairy*1000.,
