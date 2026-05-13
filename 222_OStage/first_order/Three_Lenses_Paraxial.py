@@ -5,10 +5,14 @@ Created on Tue Nov 11 18:17:51 2025
 @author: MORGANRHAINAJERAROA
 """
 
+from pathlib import Path
+import sys
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 from scipy.optimize import least_squares
 import numpy as np
 from utils import (matrix_refraction, matrix_trasmition)
-import os
+
 
 b_1 = -1 / (1.118E004 / 2)       # Optical power of the primary mirror
 b_2 = -1 / (-4430. / 2)          # Optical power of the secondary mirror
@@ -245,24 +249,22 @@ R1, R2 = R_from_phi_closed(b_3, n_L1, 22.5, beta1, ('+','+'))
 R3, R4 = R_from_phi_closed(b_4, n_L2,  9., beta2, ('-','+'))
 R5, R6 = R_from_phi_closed(b_5, n_L1, 16., beta3, ('+','-'))
 
-# Lista de parámetros de primer orden
+# First-order parameter list
 First_Order_Parameters_Glass_ChCanal = [
-    R1, R2, R3, R4, R5, R6]
+    R1, R2, R3, R4, R5, R6
+]
 
-# Crear carpeta
-folder_name = "Optimized_Parameters"
-os.makedirs(folder_name, exist_ok=True)
+# Output directory
+output_dir = PROJECT_ROOT / "optimized_parameters"
+output_dir.mkdir(parents=True, exist_ok=True)
 
-# Limpiar nombre del vidrio para usarlo en archivo
+# Clean glass name for filename
 glass_tag = Glass.replace(" ", "").replace("&", "_")
 
-# Ruta del archivo
-file_path = os.path.join(
-    folder_name,
-    f"First_Order_Parameters_{glass_tag}_Ch{Canal}.txt"
-)
+# Output file path
+file_path = output_dir / f"First_Order_Parameters_{glass_tag}_Ch{Canal}.txt"
 
-# Escritura del archivo
+# Write file
 with open(file_path, "w", encoding="utf-8") as f:
     f.write("# First-order parameters\n")
     f.write(f"# Glass : {Glass}\n")
@@ -273,12 +275,4 @@ with open(file_path, "w", encoding="utf-8") as f:
     f.write("]\n")
 
 print(f"[ok] Archivo '{file_path}' guardado con los valores actuales.")
-
-print('Curvature of radii of the lenses')
-print('First Lens')
-print(f"R_1: {R1:.2f} , R_2: {R2:.2f} mm")
-print('Second Lens')
-print(f"R_3: {R3:.2f} , R_4: {R4:.2f} mm")
-print('Third Lens')
-print(f"R_5: {R5:.2f} , R_6: {R6:.2f} mm")
 
