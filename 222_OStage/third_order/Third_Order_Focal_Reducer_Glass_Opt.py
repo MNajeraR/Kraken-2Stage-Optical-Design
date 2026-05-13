@@ -471,10 +471,12 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     spt_dir = SCRIPT_DIR / "figures" / "SPT_Diagrams_Glasses_optimization"
     spt_dir.mkdir(parents=True, exist_ok=True)
     
+    
     List_Radius_raw = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}",save_dir=  save_dir=spt_dir
+    name_save=f"Third_Order_{save_prefix}",save_dir = spt_dir
     )
+    
     List_Radius = np.asarray(List_Radius_raw[0], dtype=float)
     spot_metadata = List_Radius_raw[1]
     
