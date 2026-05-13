@@ -217,20 +217,24 @@ def Complete_Matrix(v):
     b_4 = M_L2[0,1]
     b_5 = M_L3[0,1]
     
-    exit_1 = MSJS@Thhf_mar1
-    exit_2 = M_TR1@M_L1@exit_1
-    exit_3 = M_TR2@M_L2@exit_2
-
-    M_RF = M_TR3@M_L3@M_TR2@M_L2@M_TR1@M_L1
-    b_RF = M_RF[0,1]
+    exit_1 = MSJS @ Thhf_mar1
+    exit_2 = M_TR1 @ M_L1 @ exit_1
+    exit_3 = M_TR2 @ M_L2 @ exit_2
     
-    diff_H = float(exit_1[1]*b_3+exit_2[1]*b_4+exit_3[1]*b_5-exit_1[1]*b_RF)
+    M_RF = M_TR3 @ M_L3 @ M_TR2 @ M_L2 @ M_TR1 @ M_L1
+    b_RF = M_RF[0, 1]
     
-    diff_P3 = (M_L3[0,1])/n_L1 + M_L2[0,1]/n_L2 + M_L1[0,1]/n_L1
-    b = np.abs(-1/M_T[0,1] - (-1/b_t))
-    d = M_T[1,1]
+    exit_1_h = float(exit_1[1, 0])
+    exit_2_h = float(exit_2[1, 0])
+    exit_3_h = float(exit_3[1, 0])
     
-    return b, diff_P3, diff_H, d
+    diff_H = exit_1_h*b_3 + exit_2_h*b_4 + exit_3_h*b_5 - exit_1_h*b_RF
+    
+    diff_P3 = float(M_L3[0, 1]/n_L1 + M_L2[0, 1]/n_L2 + M_L1[0, 1]/n_L1)
+    b = float(np.abs(-1/M_T[0, 1] - (-1/b_t)))
+    d = float(M_T[1, 1])
+        
+    return [b, diff_P3, diff_H, d]
 
 bounds = ([0.00111, -0.0044, 0.00131],    # límites inferiores
           [0.00444, -0.00133, 0.0044])    # límites superiores
