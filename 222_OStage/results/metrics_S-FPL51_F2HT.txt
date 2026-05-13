@@ -4,11 +4,12 @@ Final Seidel Aberrations:
   Coma      = -9.00
   Astig     = 14.49
   CLon      = 14.73
-EFFL = 9127.191110 mm
-MS_d = -2.34406e-05
+EFFL = 9127.191122 mm
+MS_d = -2.33918e-05
 Airy's disk comparison with GEO and RMS:
   GEO/Airy = 42.38
   RMS/Airy = 20.92
-GEO_R_avg_mm = 94.363692
-RMS_R_avg_mm = 46.585258
-EE_info = [24.143844632866866, 35.64321738540376, 36.059085180710575, 54.23618672892185]
+GEO_R_avg_mm = 94.362608
+RMS_R_avg_mm = 46.584749
+EE_info = [np.float64(25.879066982205206), np.float64(35.31946837450557), np.float64(35.245602114502205), np.float64(53.52461304032682)]
+Spot metadata = {'fields_deg': [(0.0, 0.0, 'Field_0'), (0.07062161665871489, 0.0, 'Field_1'), (0.0, -0.07062161665871489, 'Field_2'), (0.07062161665871489, -0.07062161665871489, 'Field_3')], 'output_dir': WindowsPath('C:/Users/Morgan/Documents/KrakenOS/Kraken-2Stage-Optical-Design/222_OStage/third_order/figures/SPT_Diagrams_Glasses_optimization'), 'ptype': 'hexapolar', 'name_save': 'Third_Order_S-FPL51_F2HT', 'box_limit': 0.12521113768543024}
