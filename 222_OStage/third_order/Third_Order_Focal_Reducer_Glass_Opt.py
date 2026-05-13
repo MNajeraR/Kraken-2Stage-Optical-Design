@@ -103,7 +103,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     if save_prefix is None:
         save_prefix = f"{safe_name(glass_a)}_{safe_name(glass_b)}"
     results_dir = PROJECT_ROOT / "results"
-    ee_dir =  "figures" / "EE_Diagrams_Glasses_optimization"
+    ee_dir =  "figures\EE_Diagrams_Glasses_optimization"
     ensure_dirs(results_dir, ee_dir)
     
     # ---------- Paraxial setup ----------
@@ -468,7 +468,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     
     List_Radius_raw = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}",save_dir= "figures" / "SPT_Diagrams_Glasses_optimization"
+    name_save=f"Third_Order_{save_prefix}",save_dir= "figures\SPT_Diagrams_Glasses_optimization"
     )
     List_Radius = np.asarray(List_Radius_raw[0], dtype=float)
     spot_metadata = List_Radius_raw[1]
