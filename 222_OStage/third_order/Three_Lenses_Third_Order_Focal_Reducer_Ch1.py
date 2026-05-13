@@ -37,7 +37,6 @@ import time
 import numpy as np
 import pkg_resources
 import scipy
-import os
 
 
 # Import KrakenOS and custom modules
