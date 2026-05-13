@@ -2,24 +2,23 @@
 # ===============================
 #      Library Imports
 # ===============================
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import time
 import numpy as np
 import pkg_resources
 import scipy
-# import math
-# from collections import OrderedDict
-
-
-import matplotlib.pyplot as plt
+import re
+import json
 
 # Import KrakenOS and custom modules
-from utils import (Paraxial_Cal, ThirdOrder_Cal, analyze_ranked, 
-                   Set_Initial_Radius, apply_system_actualization, configure_and_trace,  
+from utils import (Paraxial_Cal, ThirdOrder_Cal, 
+                   Set_Initial_Radius, apply_system_actualization,  
                    Prin_Plane, run_spots_for_fields, seidel_terms, airy_data, 
-                   configure_pupil_and_ab, set_pair_glass, plot_all_EE_for_fields) 
+                   configure_pupil_and_ab, plot_all_EE_for_fields) 
                     
-
 # Check if KrakenOS is installed, otherwise append its path
 required = {'KrakenOS'}
 installed = {pkg.key for pkg in pkg_resources.working_set}
@@ -34,29 +33,28 @@ import KrakenOS as Kos
     # ===============================
     #    Constants Definition
     # ===============================
-    
 
-import os, re, json
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 def safe_name(s: str) -> str:
     return re.sub(r'[^A-Za-z0-9._-]+', '_', str(s))
 
 def ensure_dirs(*dirs):
     for d in dirs:
-        os.makedirs(d, exist_ok=True)   
+        Path(d).mkdir(parents=True, exist_ok=True)
  
 def safe_apply_actualization(
     *,  # forces keyword-only
     system, R1, R2, R3, R4, n_l1, d_lens1, n_l2, d_lens2,
     TO_data, d4, sup, AperType, AperVal, Field_ccd,
     W_ref, Rays, Kos, AB,
-    # intentos en orden (de “fino” a “burdo”)
+    # Tries in order 
     tries=((3,6), (3,3), (1,3), (3,1), (1,1)),
     samp=7,
-    results_dir="Results",
+    results_dir=PROJECT_ROOT / "results",
     glass_a=None, glass_b=None, W=None
 ):
-    os.makedirs(results_dir, exist_ok=True)
+    Path(results_dir).mkdir(parents=True, exist_ok=True)
 
     last_err = None
     for (n_nodes, n_arms) in tries:
@@ -87,7 +85,7 @@ def safe_apply_actualization(
             break
 
     # Si llegamos aquí, TODOS los intentos fallaron → registra y “skip”
-    bad_path = os.path.join(results_dir, "bad_glasses.jsonl")
+    bad_path = results_dir / "bad_glasses.jsonl"
     rec = {
         "L1": str(glass_a), "L2": str(glass_b),
         "W_um": float(W) if W is not None else None,
@@ -104,8 +102,8 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     # Prefijo de archivos a partir de los vidrios
     if save_prefix is None:
         save_prefix = f"{safe_name(glass_a)}_{safe_name(glass_b)}"
-    results_dir = "Results"
-    ee_dir = os.path.join("Images", "EE_Diagrams")
+    results_dir = PROJECT_ROOT / "results"
+    ee_dir = PROJECT_ROOT / "figures" / "EE_Diagrams"
     ensure_dirs(results_dir, ee_dir)
     
     # ---------- Paraxial setup ----------
@@ -301,7 +299,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     try:
         Prx = Telescope_f85_FR.Parax(W)
     except Exception as e:
-        bad_path = os.path.join(results_dir, "bad_glasses.txt")
+        bad_path = results_dir / "bad_glasses.jsonl"
         rec = {"L1": str(glass_a), "L2": str(glass_b), "W_um": float(W), "error": f"{type(e).__name__}: {e}"}
         with open(bad_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -387,8 +385,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     #  System Update with Optimized Values
     # ======================================
     
-    
-    # Actualization of the system using Gaussian Quadrature 
+
     # --- Actualization of the system using Gaussian Quadrature ---
     Telescope_f85_FR, deltaZ = safe_apply_actualization(
         system=Telescope_f85_FR,
@@ -478,7 +475,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     RMS_R_average = float(np.average(List_Radius[:, 1] * 1000))
 
     # EE (PDF)
-    ee_pdf = os.path.join(ee_dir, f"EE_{save_prefix}_fields.pdf")
+    ee_pdf = ee_dir / f"EE_{save_prefix}_fields.pdf"
     ee_name = f"EE_{save_prefix}_fields.pdf"
     EE_Example_information = plot_all_EE_for_fields(
     Pup, Rays, Field_ccd, RW,
@@ -488,7 +485,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     filename=ee_name)           
 
     # Set_Initial_Opt (TXT)
-    set_txt = os.path.join(results_dir, f"Optical_Parameters_{save_prefix}.txt")
+    set_txt = results_dir / f"Optical_Parameters_{save_prefix}.txt"
     
     with open(set_txt, "w", encoding="utf-8") as f:
         f.write("Optical_Parameters = [\n")
@@ -497,7 +494,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
         f.write("]\n")
 
     # Métricas (TXT)
-    metrics_txt = os.path.join(results_dir, f"metrics_{save_prefix}.txt")
+    metrics_txt = results_dir / f"metrics_{save_prefix}.txt"
     with open(metrics_txt, "w", encoding="utf-8") as f:
         f.write(f"L1={glass_a}  L2={glass_b}\n")
         f.write("Final Seidel Aberrations:\n")
