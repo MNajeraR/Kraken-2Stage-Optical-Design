@@ -101,6 +101,16 @@ This folder contains reusable classes and equations used across the scripts.
 
 ---
 
+## Related publication
+
+Najera et al. (2026)
+
+"Optical design of OPTICAL-ARG: a three channel high-time resolution camera for the Jorge Sahade telescope"
+
+https://arxiv.org/abs/2605.11329
+
+---
+
 ## License
 
 This project is licensed under the GNU GPL v3.0 License.
