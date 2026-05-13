@@ -466,19 +466,13 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     
     wavelengths = [AB.Wf, W, AB.Wc]
     
-    List_Radius_raw = run_spots_for_fields(
+    List_Radius = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}",save_dir='figures\SPT_Diagrams_Glasses'
+    name_save=f"Third_Order_{save_prefix}",save_dir=PROJECT_ROOT / "figures" / "SPT_Diagrams"
     )
-    
-    # Convert output to a consistent 2-column array: [GEO, RMS]
-    if isinstance(List_Radius_raw, (list, tuple)) and len(List_Radius_raw) == 2:
-        GEO_values = np.asarray(List_Radius_raw[0], dtype=float).ravel()
-        RMS_values = np.asarray(List_Radius_raw[1], dtype=float).ravel()
-        List_Radius = np.column_stack((GEO_values, RMS_values))
-    else:
-        List_Radius = np.asarray(List_Radius_raw, dtype=float)
-    
+    print(List_Radius)
+    List_Radius = np.asarray(List_Radius, dtype=float)
+
     GEO_R_average = float(np.average(List_Radius[:, 0] * 1000))
     RMS_R_average = float(np.average(List_Radius[:, 1] * 1000))
 
