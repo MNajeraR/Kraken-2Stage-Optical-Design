@@ -35,6 +35,7 @@ import KrakenOS as Kos
     # ===============================
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = Path(__file__).resolve().parent
 
 def safe_name(s: str) -> str:
     return re.sub(r'[^A-Za-z0-9._-]+', '_', str(s))
@@ -103,7 +104,8 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     if save_prefix is None:
         save_prefix = f"{safe_name(glass_a)}_{safe_name(glass_b)}"
     results_dir = PROJECT_ROOT / "results"
-    ee_dir =  "figures\EE_Diagrams_Glasses_optimization"
+    ee_dir = SCRIPT_DIR / "figures" / "EE_Diagrams_Glasses_optimization"
+    ee_dir.mkdir(parents=True, exist_ok=True)
     ensure_dirs(results_dir, ee_dir)
     
     # ---------- Paraxial setup ----------
@@ -112,7 +114,7 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     EFFL_JSTelescope = 18273.877041856547             # Effective Focal Length
     
     b_3 = -0.009626281725433176                       # Optical power of Lens L1
-    b_4 = 0.01065114262935968                       # Optical power of Lens L2
+    b_4 = 0.01065114262935968                         # Optical power of Lens L2
     
     d_lens1 = 30.                                     # Thickness of Lens L1
     d_lens2 = 8.5                                     # Thickness of Lens L2
@@ -466,9 +468,12 @@ def run_glasses(glass_a, glass_b,  *, save_prefix=None):
     
     wavelengths = [AB.Wf, W, AB.Wc]
     
+    spt_dir = SCRIPT_DIR / "figures" / "SPT_Diagrams_Glasses_optimization"
+    spt_dir.mkdir(parents=True, exist_ok=True)
+    
     List_Radius_raw = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths, xairy, yairy,
-    name_save=f"Third_Order_{save_prefix}",save_dir= "figures\SPT_Diagrams_Glasses_optimization"
+    name_save=f"Third_Order_{save_prefix}",save_dir=  save_dir=spt_dir
     )
     List_Radius = np.asarray(List_Radius_raw[0], dtype=float)
     spot_metadata = List_Radius_raw[1]
