@@ -28,6 +28,11 @@ Dependencies:
 #      Library Imports
 # ===============================
 
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 import numpy as np
 import pkg_resources
@@ -82,7 +87,13 @@ def read_first_order_parameters(file_path):
 
     return params
 
-file_path =  f"Optimized_Parameters/First_Order_Parameters_{glass_tag}_Ch2.txt"
+optimizedparameters_ROOT = Path(__file__).resolve().parents[1]
+
+file_path = (
+    optimizedparameters_ROOT
+    / "optimized_parameters"
+    / f"First_Order_Parameters_{glass_tag}_Ch2.txt"
+)
 
 First_Order_Params = read_first_order_parameters(file_path)
 
@@ -446,19 +457,27 @@ Optical_Parameters_Set.append(Set_Initial_Opt)
 #  Save Parameters
 # ======================================
 
-folder_name = "Optimized_Parameters"
-os.makedirs(folder_name, exist_ok=True)
+output_dir = optimizedparameters_ROOT / "optimized_parameters"
+output_dir.mkdir(parents=True, exist_ok=True)
 
-
-file_path = os.path.join(folder_name,f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2.txt")
+file_path = (
+    output_dir
+    / f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2.txt"
+)
 
 with open(file_path, "w", encoding="utf-8") as f:
-    f.write(f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2= [\n")
+
+    f.write(
+        f"Third_Order_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2= [\n"
+    )
+
     for value in Set_Initial_Opt:
-        f.write(f"{value:.8f},\n")  
+        f.write(f"{value:.8f},\n")
+
     f.write("]\n")
 
 print(f"[ok] Archivo '{file_path}' guardado con los valores actuales.")
+
 
 # ======================================
 #   Display Optimization Results
@@ -518,7 +537,7 @@ name_save = f"Third_Order_Three_Lenses_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2"
 List_Radius, meta = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths,
     xairy, yairy, name_save=name_save,
-    save_dir='Images\SPT_Diagrams_Article_CS/Ch2', ptype="hexapolar",
+    save_dir='figures\SPT_Diagrams\Ch2', ptype="hexapolar",
     save=True, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
     box_include_airy=False)
@@ -526,7 +545,7 @@ List_Radius, meta = run_spots_for_fields(
 
 EE_Example_information = plot_all_EE_for_fields(
                             Pup, Rays, Field_ccd, RW,
-                            show_r50 = True, save_dir='Images\EE_Diagrams_Article_CS/Ch2',
+                            show_r50 = True, save_dir='figures\EE_Diagrams\Ch2',
                             save = True,  show=True,
                             filename=f"EE_Third_Order_Three_Lenses_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch2.pdf",
                             airy_radius_um=Rairy*1000.,
