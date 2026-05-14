@@ -1,7 +1,13 @@
+from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import time
 import numpy as np
 import pkg_resources
-import os
 
 # Import KrakenOS and custom modules
 from utils import (Paraxial_Cal, Gaussian_Quadrature, BestFocus,
@@ -19,6 +25,35 @@ if missing:
     sys.path.append("../..")
 
 import KrakenOS as Kos
+
+Glass = "K-PFK85 & ADF355 & K-PFK85"
+glass_tag = Glass.replace(" ", "").replace("&", "_")
+Glass_list = [g.strip() for g in Glass.split("&")]
+
+def read_parameters(file_path):
+    params = []
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+
+            if not line or line.startswith("#"):
+                continue
+
+            if "[" in line or "]" in line or "=" in line:
+                continue
+
+            params.append(float(line.replace(",", "")))
+
+    return params
+
+file_path = (
+    PROJECT_ROOT
+    / "optimized_parameters"
+    / f"PGMF_LS_Parameters_{glass_tag}_Ch1.txt"
+)
+
+PGMF_LS_Params = read_parameters(file_path)
 
 # ===============================
 #    Constants Definition
@@ -76,22 +111,7 @@ h_i = 1076.0
 
 # Obtained through PGMF optimization by script PGMF_LS_Optimization_3L_Focal_Reducer.py
 
-## Seed Parameters Glass K-PFK85 & ADF355
-R1_initial =  139.26839030509848
-R2_initial =  1232.779162026012
-R3_initial = -534.7273114780568
-R4_initial =  318.81350700538593
-R5_initial =  224.10324570257137
-R6_initial = -463.18328094030795
-
-
-## Seed Parameters Glass S-FPL51 & F2HT
-# R1_initial =  148.9577748752043
-# R2_initial =  495.846093807155
-# R3_initial = -646.1356066071656
-# R4_initial =  426.7452809046931
-# R5_initial =  199.84481602603879
-# R6_initial = -597.9869091042822
+R1_initial, R2_initial, R3_initial, R4_initial, R5_initial, R6_initial, d_5 = PGMF_LS_Params
 
 # ======================================
 #    Optical Element Initialization
@@ -144,7 +164,7 @@ M2.Diameter = 3.175E+002 * 2.0
 L1a = Kos.surf()
 L1a.Rc = R1_initial
 L1a.Thickness = d_lens1
-L1a.Glass = "K-PFK85"
+L1a.Glass = Glass_list[0]
 # L1a.Glass = "S-FPL51"
 L1a.Diameter = F_Diameter
 
@@ -166,7 +186,7 @@ L1b.Diameter = F_Diameter
 L2a = Kos.surf()
 L2a.Rc = R3_initial
 L2a.Thickness = d_lens2
-L2a.Glass = "ADF355"
+L2a.Glass = Glass_list[1]
 # L2a.Glass = "F2HT"
 L2a.Diameter = S_Diameter + 0.1*S_Diameter
 
@@ -188,7 +208,7 @@ L2b.Diameter = S_Diameter + 0.1*S_Diameter
 L3a = Kos.surf()
 L3a.Rc = R5_initial
 L3a.Thickness = d_lens3
-L3a.Glass = "K-PFK85"
+L3a.Glass = Glass_list[2]
 # L3a.Glass = "S-FPL51"
 L3a.Diameter = T_Diameter
 
@@ -328,7 +348,7 @@ centers = [R1_initial, R2_initial, R3_initial, R4_initial, R5_initial, R6_initia
 # ro = Random_RO(1000, centers)
 
 # Define the search limits for each variable
-Delta_search= 0.11
+Delta_search= 0.10
 
 opt = Random_RO(num_range=10000, centers=centers)
 
@@ -403,11 +423,13 @@ system, deltaZ = BestFocus(all_points_x, all_points_y, all_points_z,
 
 Set_PGMF_LS_OP_Opt = [R1, R2, R3, R4, R5, R6, d5+deltaZ]
 
-folder_name = "Optimized_Parameters"
-os.makedirs(folder_name, exist_ok=True)
+output_dir = PROJECT_ROOT / "optimized_parameters"
+output_dir.mkdir(parents=True, exist_ok=True)
 
-
-file_path = os.path.join(folder_name,f"PGMF_Monte_Carlo_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}.txt")
+file_path = (
+    output_dir
+    / f"PGMF_Monte_Carlo_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}_Ch1.txt"
+)
 
 with open(file_path, "w", encoding="utf-8") as f:
     f.write(f"PGMF_Monte_Carlo_Parameters_{L1a.Glass}_{L2a.Glass}_{L3a.Glass}= [\n")
@@ -485,6 +507,12 @@ Rairy, xairy, yairy = airy_data(Telescope_f85_FR, W, M1)
 
 wavelengths = [AB.Wf, W, AB.Wc]
 
+spt_dir = SCRIPT_DIR / "figures" / "SPT_Diagrams" / "Ch1"
+ee_dir = SCRIPT_DIR / "figures" / "EE_Diagrams" / "Ch1"
+
+spt_dir.mkdir(parents=True, exist_ok=True)
+ee_dir.mkdir(parents=True, exist_ok=True)
+
 name_save = f"PGMF_Three_Lens_Monte_Carlo_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}"
 
 List_Radius, meta = run_spots_for_fields(
@@ -492,11 +520,11 @@ List_Radius, meta = run_spots_for_fields(
     xairy, yairy, name_save=name_save, ptype="hexapolar",
     save=True, show = True, show_geo_circle=False,
     show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'Images\SPT_Diagrams_Article')
+    box_include_airy=False, save_dir = spt_dir)
 
 
 EE_Example_information = plot_all_EE_for_fields(
-                            Pup, Rays, Field_ccd, RW, save_dir='Images\EE_Diagrams_Article',
+                            Pup, Rays, Field_ccd, RW, save_dir = ee_dir,
                             show_r50 = True, save = True,  show=True,
                             filename=f"EE_PGMF_Three_Lens_Monte_Carlo_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}.pdf"
                             )   
