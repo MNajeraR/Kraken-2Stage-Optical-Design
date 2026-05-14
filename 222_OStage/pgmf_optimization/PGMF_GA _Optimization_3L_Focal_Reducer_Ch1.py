@@ -127,22 +127,8 @@ h_i = 1076.0
 
 # Obtained through PGMF optimization by script PGMF_LS_Optimization_3L_Focal_Reducer.py
 
-## Seed Parameters Glass K-PFK85 & ADF355
-R1_initial =  139.26839030509848
-R2_initial =  1232.779162026012
-R3_initial = -534.7273114780568
-R4_initial =  318.81350700538593
-R5_initial =  224.10324570257137
-R6_initial = -463.18328094030795
+R1_initial, R2_initial, R3_initial, R4_initial, R5_initial, R6_initial, d_5 = PGMF_LS_Params
 
-
-## Seed Parameters Glass S-FPL51 & F2HT
-# R1_initial =  148.9577748752043
-# R2_initial =  495.846093807155
-# R3_initial = -646.1356066071656
-# R4_initial =  426.7452809046931
-# R5_initial =  199.84481602603879
-# R6_initial = -597.9869091042822
 
 # ======================================
 #    Optical Element Initialization
@@ -385,7 +371,7 @@ num_genes = 7                         # Number of variables (6 radii + 1 thickne
 mutation_num_genes=3                     
 
 # Define the search limits for each variable
-Delta_search= 0.11
+Delta_search= 0.10
 
 limits = [
     {'low': R1_initial - R1_initial*Delta_search, 'high': R1_initial + R1_initial*Delta_search},
@@ -575,21 +561,40 @@ Rairy, xairy, yairy = airy_data(Telescope_f85_FR, W, M1)
 
 wavelengths = [AB.Wf, W, AB.Wc]
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+spt_dir = SCRIPT_DIR / "figures" / "SPT_Diagrams" / "Ch1"
+ee_dir = SCRIPT_DIR / "figures" / "EE_Diagrams" / "Ch1"
+
+spt_dir.mkdir(parents=True, exist_ok=True)
+ee_dir.mkdir(parents=True, exist_ok=True)
+
 name_save = f"PGMF_Three_Lens_GA_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}"
 
 List_Radius, meta = run_spots_for_fields(
     Pup, Rays, Field_ccd, wavelengths,
-    xairy, yairy, name_save=name_save, ptype="hexapolar",
-    save=True, show = True, show_geo_circle=False,
-    show_rms_circle=False, lock_box_across_fields=True,    
-    box_include_airy=False, save_dir = 'figures\SPT_Diagrams\Ch1')
+    xairy, yairy,
+    name_save=name_save,
+    ptype="hexapolar",
+    save=True,
+    show=True,
+    show_geo_circle=False,
+    show_rms_circle=False,
+    lock_box_across_fields=True,
+    box_include_airy=False,
+    save_dir=spt_dir
+)
 
 
 EE_Example_information = plot_all_EE_for_fields(
-                            Pup, Rays, Field_ccd, RW, save_dir='figures\EE_Diagrams\Ch1',
-                            show_r50 = True, save = True,  show=True,
-                            filename=f"EE_PGMF_Three_Lens_GA_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}.pdf"
-                            )   
+    Pup, Rays, Field_ccd, RW,
+    save_dir=ee_dir,
+    show_r50=True,
+    save=True,
+    show=True,
+    filename=f"EE_PGMF_Three_Lens_GA_{L1a.Glass}_{L2a.Glass}_{L1a.Glass}.pdf"
+)
+
 
 # Convert to NumPy array for easy manipulation
 List_Radius = np.array(List_Radius)
@@ -602,7 +607,6 @@ GEO_R_average = np.average(GEO_R)
 # RMS_radius in mm 
 RMS_R = List_Radius[:, 1] * 1000
 RMS_R_average = np.average(RMS_R)
-
 
 # ======================================
 #    Plot for All the System
