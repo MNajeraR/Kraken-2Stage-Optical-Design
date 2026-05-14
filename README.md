@@ -1,5 +1,7 @@
 # 222_OStage
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20187549.svg)](https://doi.org/10.5281/zenodo.20187549)
+
 This repository contains the scripts and tools used to implement the optical design and optimization workflow for focal reducer systems. The workflow includes first-order modeling, third-order aberration-based optimization, glass selection, a physically grounded merit function (PGMF) optimization stage, and a second-stage refinement based on RMS-driven merit functions (RMSMF).
 
 The folder `222_OStage` contains the Python scripts used to generate the results presented in the associated manuscript. For proper execution, this folder must be placed within the KrakenOS directory, at the same level as the `Examples` folder.
@@ -101,13 +103,33 @@ This folder contains reusable classes and equations used across the scripts.
 
 ---
 
+## Citation
+
+If you use this repository, please cite:
+
+Software DOI:
+https://doi.org/10.5281/zenodo.20187549
+
+---
+
 ## Related publication
 
 Najera et al. (2026)
 
-"Optical design of OPTICAL-ARG: a three channel high-time resolution camera for the Jorge Sahade telescope"
+"Optical design of OPTICAM-ARG: a three channel high-time resolution camera for the Jorge Sahade telescope"
 
 https://arxiv.org/abs/2605.11329
+
+---
+
+## Requirements
+
+- NumPy 1.22.1
+- SciPy 1.7.3
+- PyGAD 3.0.1
+- bees-algorithm 1.0.2
+- KrakenOS 1.0.0.19
+- matplotlib 3.5.2
 
 ---
 
