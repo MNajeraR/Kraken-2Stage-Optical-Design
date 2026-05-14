@@ -1,15 +1,36 @@
 cff-version: 1.2.0
+
 title: "Kraken-2Stage-Optical-Design"
-message: "If you use this repository, please cite it."
+
+message: "If you use this repository, please cite it using the metadata from this file."
 
 type: software
 
 authors:
-  - family-names: "Nájera"
+  - family-names: "Najera"
     given-names: "Morgan R."
+
+version: "1.0.0"
+
+doi: 10.5281/zenodo.20187549
 
 license: GPL-3.0
 
-repository-code: "https://github.com/TU_USER/TU_REPO"
+repository-code: "https://github.com/MNajeraR/Kraken-2Stage-Optical-Design"
 
-version: "1.0.0"
+url: "https://github.com/MNajeraR/Kraken-2Stage-Optical-Design"
+
+abstract: >
+  Implementation of a two-stage optical design workflow for astronomical
+  focal reducer systems, including first-order paraxial modeling,
+  third-order aberration optimization, glass selection, physically grounded
+  merit function (PGMF) optimization, and RMS-based image-quality refinement.
+
+keywords:
+  - optics
+  - optical-design
+  - astronomy
+  - ray-tracing
+  - optimization
+  - KrakenOS
+  - astrophysics
