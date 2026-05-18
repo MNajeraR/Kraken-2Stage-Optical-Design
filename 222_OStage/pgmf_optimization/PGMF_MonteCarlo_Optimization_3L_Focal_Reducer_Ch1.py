@@ -350,7 +350,7 @@ centers = [R1_initial, R2_initial, R3_initial, R4_initial, R5_initial, R6_initia
 # Define the search limits for each variable
 Delta_search= 0.10
 
-opt = Random_RO(num_range=10000, centers=centers)
+opt = Random_RO(num_range=5000, centers=centers)
 
 limits = [(R1_initial - R1_initial*Delta_search, R1_initial + R1_initial*Delta_search), 
           (R2_initial - R2_initial*Delta_search, R2_initial + R2_initial*Delta_search),
