@@ -406,7 +406,7 @@ Pup.FieldX = np.rad2deg(Field_ccd)
 InfSystem = [Telescope_f85_FR, Rays, Pup]
 
 # Define function to avoid repetition of sampling + coordinate extraction
-def sample_gaussian_rays(wavelengths, n_nodes=3, n_arms=6, fx=0.0, fy=-np.rad2deg(Field_ccd), resp=0):
+def sample_gaussian_rays(wavelengths, n_nodes=3, n_arms=6, fx=np.rad2deg(Field_ccd), fy=-np.rad2deg(Field_ccd), resp=0):
     samples = [Gaussian_Quadrature(InfSystem, wl).Coordinates_GQ(n_nodes, n_arms, fx, fy, resp) for wl in wavelengths]
     return [np.concatenate(items) for items in zip(*samples)]
 
