@@ -232,95 +232,309 @@ class Glass_Selector:
     # -------- plot --------
     def plot_nv_with_inset(
         self,
-        mx: float = 1.0, my: float = 0.01,
-        figsize: Tuple[float, float] = (9, 7),
-        inset_size: str = "40%", inset_loc: str = "upper left", borderpad: float = 1.2,
-        title: str = "Optical Glass Selection",
-        legend_loc: str = "lower right",
-        inset_legend_loc: str = "lower right",
-        fmt_n: str = "{:.2f}", fmt_vd: str = "{:.2f}",
-        s_ref: float = 30.0
+        mx=1.0,
+        my=0.01,
+        figsize=(9,7),
+        inset_size="40%",
+        inset_loc="upper left",
+        borderpad=1.2,
+        title="Optical Glass Selection",
+        legend_loc="lower right",
+        inset_legend_loc="lower right",
+        fmt_n="{:.2f}",
+        fmt_vd="{:.2f}",
+        s_ref=55,
     ):
-        """
-        Draw the n–v_d diagram with a zoomed inset.
-        - Highlights the reference glass as a black dot (if applicable).
-        - The inset legend shows name + n and v_d values.
-        """
-
-        def _limits_from(arr_x: np.ndarray, arr_y: np.ndarray, pad_x: float, pad_y: float):
-            return (np.nanmin(arr_x) - pad_x, np.nanmax(arr_x) + pad_x,
-                    np.nanmin(arr_y) - pad_y, np.nanmax(arr_y) + pad_y)
-
-        vd_possible, n_possible = self.vd_all_possible, self.n_all_possible
-        vd_all, n_all = self.vd_all, self.n_all
-
+    
+    
+        # ==========================================================
+        # Colors (matching presentation)
+        # ==========================================================
+    
+        BG      = (242/255,243/255,245/255)
+    
+        TEXT    = (14/255,14/255,14/255)
+    
+        AXIS    = (80/255,80/255,80/255)
+    
+        #GRID    = (200/255,200/255,200/255)
+    
+        ALLPTS  = (110/255,110/255,110/255)
+    
+        ORANGE  = (220/255,125/255,30/255)
+    
+        GREEN   = (0/255,120/255,70/255)
+    
+        def _limits_from(arr_x, arr_y, pad_x, pad_y):
+            return (
+                np.nanmin(arr_x)-pad_x,
+                np.nanmax(arr_x)+pad_x,
+                np.nanmin(arr_y)-pad_y,
+                np.nanmax(arr_y)+pad_y,
+            )
+    
+        vd_possible = self.vd_all_possible
+        n_possible  = self.n_all_possible
+    
+        vd_all = self.vd_all
+        n_all  = self.n_all
+    
         if vd_possible.size:
-            x_low, x_high, y_low, y_high = _limits_from(vd_possible, n_possible, mx, my)
+            x_low,x_high,y_low,y_high = _limits_from(
+                vd_possible,
+                n_possible,
+                mx,
+                my,
+            )
+    
         elif vd_all.size:
-            x_low, x_high, y_low, y_high = _limits_from(vd_all, n_all, mx, my)
+            x_low,x_high,y_low,y_high = _limits_from(
+                vd_all,
+                n_all,
+                mx,
+                my,
+            )
+    
         else:
-            raise ValueError("No data to plot (vd_all/vd_all_possible are empty).")
-
-        fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
-        ax.scatter(vd_all, n_all, marker='.', alpha=0.35, label='All')
-        ax.scatter(vd_possible, n_possible, marker='*', label='Possible')
-
-        ax.set_xlabel(r"$v_d$", fontsize=16)
-        ax.set_ylabel(r"$n$", fontsize=16)
-        ax.set_title(title, fontsize=16)
-        ax.tick_params(axis='both', labelsize=12)
-        ax.grid(True, alpha=0.3)
-
-        # invert X and put n ticks/label on the right
+            raise ValueError("No glasses to plot.")
+    
+        fig,ax = plt.subplots(
+            figsize=figsize,
+            constrained_layout=True,
+        )
+    
+        # ----------------------------------------------------------
+        # Background
+        # ----------------------------------------------------------
+    
+        fig.patch.set_facecolor(BG)
+    
+        ax.set_facecolor(BG)
+    
+        # ----------------------------------------------------------
+        # Scatter
+        # ----------------------------------------------------------
+    
+        ax.scatter(
+            vd_all,
+            n_all,
+            color=ALLPTS,
+            alpha=0.45,
+            s=18,
+            label="Catalog"
+        )
+    
+        ax.scatter(
+            vd_possible,
+            n_possible,
+            marker="*",
+            color=ORANGE,
+            s=65,
+            label="Candidates",
+            zorder=3
+        )
+    
+        # ----------------------------------------------------------
+        # Axis
+        # ----------------------------------------------------------
+    
+        ax.set_xlabel(r"$V_d$",fontsize=20,color=TEXT)
+    
+        ax.set_ylabel(r"$n$",fontsize=20,color=TEXT)
+    
+        #ax.set_title(title,fontsize=17,color=TEXT)
+    
+        ax.tick_params(
+            axis="both",
+            labelsize=20,
+            colors=TEXT,
+            width=1.5,
+        )
+    
+        # ax.grid(
+        #     True,
+        #     color=GRID,
+        #     linewidth=0.8,
+        #     alpha=0.8,
+        # )
+    
+        for s in ax.spines.values():
+            s.set_linewidth(1.6)
+            s.set_color(AXIS)
+    
         ax.invert_xaxis()
+    
         ax.yaxis.set_ticks_position('right')
+    
         ax.yaxis.set_label_position('right')
-
-        # zoom rectangle (note: X axis is inverted)
-        rect = patches.Rectangle((x_high, y_low), (x_low - x_high), (y_high - y_low),
-                                 linewidth=1.2, edgecolor='red', facecolor='none', linestyle='--')
+    
+        # ----------------------------------------------------------
+        # Zoom rectangle
+        # ----------------------------------------------------------
+    
+        rect = patches.Rectangle(
+            (x_high,y_low),
+            (x_low-x_high),
+            (y_high-y_low),
+            linewidth=2.0,
+            edgecolor=ORANGE,
+            linestyle="--",
+            facecolor="none",
+        )
+    
         ax.add_patch(rect)
-
-        # inset
-        axins = inset_axes(ax, width=inset_size, height=inset_size, loc=inset_loc, borderpad=borderpad)
-        axins.scatter(vd_all, n_all, marker='.', alpha=0.15)
-        axins.scatter(vd_possible, n_possible, marker='*')
-
-        axins.set_xlim(x_low, x_high)
-        axins.set_ylim(y_low, y_high)
+    
+        # ----------------------------------------------------------
+        # Inset
+        # ----------------------------------------------------------
+    
+        axins = inset_axes(
+            ax,
+            width=inset_size,
+            height=inset_size,
+            loc=inset_loc,
+            borderpad=borderpad,
+        )
+    
+        axins.set_facecolor(BG)
+    
+        axins.scatter(
+            vd_all,
+            n_all,
+            color=ALLPTS,
+            alpha=0.20,
+            s=12,
+        )
+    
+        axins.scatter(
+            vd_possible,
+            n_possible,
+            marker="*",
+            color=ORANGE,
+            s=55,
+        )
+    
+        axins.set_xlim(x_low,x_high)
+    
+        axins.set_ylim(y_low,y_high)
+    
         axins.invert_xaxis()
-        axins.grid(True, alpha=0.2)
-        axins.tick_params(labelsize=8)
+    
+        # axins.grid(
+        #     True,
+        #     color=GRID,
+        #     alpha=0.6,
+        #     linewidth=0.7,
+        # )
+    
+        axins.tick_params(
+            labelsize=12,
+            colors=TEXT,
+            width=1.2,
+        )
+    
+        for s in axins.spines.values():
+            s.set_linewidth(1.2)
+            s.set_color(AXIS)
+    
         axins.yaxis.set_ticks_position('right')
+    
         axins.yaxis.set_label_position('right')
-
-        # find reference (search first in 'possible')
-        x_ref = y_ref = None
+    
+        # ----------------------------------------------------------
+        # Reference glass
+        # ----------------------------------------------------------
+    
+        x_ref = None
+        y_ref = None
         label_ref = ""
+    
         if self.ref_i is not None:
-            for idx_arr, vx, vy, names in (
-                (self.Glass_idx_possible, vd_possible, n_possible, self.Names_Glass_possible),
-                (self.Glass_idx_filtered, self.vd_all_filtered, self.n_all_filtered, self.Names_Glass_filtered),
-                (self.Glass_idx, vd_all, n_all, self.Names_Glass),
+    
+            for idx_arr,vx,vy,names in (
+    
+                (self.Glass_idx_possible,
+                 vd_possible,
+                 n_possible,
+                 self.Names_Glass_possible),
+    
+                (self.Glass_idx_filtered,
+                 self.vd_all_filtered,
+                 self.n_all_filtered,
+                 self.Names_Glass_filtered),
+    
+                (self.Glass_idx,
+                 vd_all,
+                 n_all,
+                 self.Names_Glass),
             ):
+    
                 if idx_arr.size:
-                    m = (idx_arr == self.ref_i)
+    
+                    m = idx_arr == self.ref_i
+    
                     if np.any(m):
+    
                         x_ref = float(vx[m][0])
+    
                         y_ref = float(vy[m][0])
+    
                         label_ref = str(names[m][0])
+    
                         break
-
-        if x_ref is not None and y_ref is not None:
-            ax.scatter(x_ref, y_ref, s=s_ref, marker='o', zorder=6, label=label_ref)
-            inset_label = rf"{label_ref}: $n={fmt_n.format(y_ref)}$, $v_d={fmt_vd.format(x_ref)}$"
-            axins.scatter(x_ref, y_ref, s=s_ref, marker='o', zorder=7, label=inset_label)
-            axins.legend(loc=inset_legend_loc, fontsize=8, frameon=True, borderpad=0.4,
-                         handlelength=1.0, handletextpad=0.5)
-
-        # de-duplicate legend
-        handles, labels = ax.get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
-        ax.legend(by_label.values(), by_label.keys(), loc=legend_loc, fontsize=12)
-
-        return fig, ax, axins
+    
+        if x_ref is not None:
+    
+            ax.scatter(
+                x_ref,
+                y_ref,
+                s=s_ref*2,
+                color=GREEN,
+                edgecolor=TEXT,
+                linewidth=0.8,
+                zorder=6,
+                label="Reference",
+            )
+    
+            axins.scatter(
+                x_ref,
+                y_ref,
+                s=s_ref*2,
+                color=GREEN,
+                edgecolor=TEXT,
+                linewidth=0.8,
+                zorder=7,
+                label=rf"{label_ref}: $n={fmt_n.format(y_ref)}$, $V_d={fmt_vd.format(x_ref)}$",
+            )
+    
+            leg=axins.legend(
+                loc=inset_legend_loc,
+                fontsize=12,
+                frameon=True,
+            )
+    
+            leg.get_frame().set_facecolor(BG)
+    
+            leg.get_frame().set_edgecolor(AXIS)
+    
+        # ----------------------------------------------------------
+        # Legend
+        # ----------------------------------------------------------
+    
+        handles,labels=ax.get_legend_handles_labels()
+    
+        by_label=dict(zip(labels,handles))
+    
+        leg=ax.legend(
+            by_label.values(),
+            by_label.keys(),
+            loc=legend_loc,
+            fontsize=11,
+            frameon=True,
+        )
+    
+        leg.get_frame().set_facecolor(BG)
+    
+        leg.get_frame().set_edgecolor(AXIS)
+    
+        return fig,ax,axins
