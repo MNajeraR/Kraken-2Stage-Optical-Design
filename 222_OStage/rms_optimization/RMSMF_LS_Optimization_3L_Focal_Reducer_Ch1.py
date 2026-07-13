@@ -27,8 +27,8 @@ import KrakenOS as Kos
 # ===============================
 # ===============================
 
-# Glass = 'K-PFK85 & ADF355 & K-PFK85'
-Glass = 'S-FPL51 & F2HT & S-FPL51'
+Glass = 'K-PFK85 & ADF355 & K-PFK85'
+#Glass = 'S-FPL51 & F2HT & S-FPL51'
 
 glass_tag = Glass.replace(" ", "").replace("&", "_")
 Glass_list = [g.strip() for g in Glass.split('&')]
