@@ -359,7 +359,6 @@ print('')
 #    RMS Optimization Process
 # ===============================
 print("\nStarting RMS Optimization...")
-start_time = time.time()
 
 # Initialize optimization function using Gaussian Quadrature and RMS-based metric
 MyFun = RMS3LFunction2Optimize(InfSystem, RW)
@@ -375,12 +374,15 @@ LimInf = [-1e7] * 6
 LimSup = [ 1e7] * 6
 bounds = (LimInf, LimSup)
 
+start_time = time.time()
 
 R = scipy.optimize.least_squares(MyFun.EFFL_3W, [R1, R2, R3, R4, R5, R6], bounds=bounds, verbose=0, 
                                       ftol = 1e-2)
 
-R1, R2, R3, R4, R5, R6 = R.x
 elapsed_time = time.time() - start_time
+
+R1, R2, R3, R4, R5, R6 = R.x
+
 
 
 # Update the optical system
