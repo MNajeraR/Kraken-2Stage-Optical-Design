@@ -12,7 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from scipy.optimize import least_squares
 import numpy as np
 from utils import (matrix_refraction, matrix_trasmition)
-
+from time import perf_counter
 
 b_1 = -1 / (1.118E004 / 2)       # Optical power of the primary mirror
 b_2 = -1 / (-4430. / 2)          # Optical power of the secondary mirror
@@ -40,8 +40,8 @@ MSJS = M6 @ M7 @ M8 @ M9 @ M10
 
 b_t = -1 / 9127.198583362275 
 
-# Glass = 'K-PFK85 & ADF355 & K-PFK85'
-Glass = 'S-FPL51 & F2HT & S-FPL51'
+Glass = 'K-PFK85 & ADF355 & K-PFK85'
+#Glass = 'S-FPL51 & F2HT & S-FPL51'
 Canal =  3
 
 if Glass ==  'K-PFK85 & ADF355 & K-PFK85':
@@ -240,12 +240,14 @@ bounds = ([0.00111, -0.0044, 0.00131],    # límites inferiores
           [0.00444, -0.00133, 0.0044])    # límites superiores
 
 initial_guess = [0.0033, -0.003, 0.003]  # dentro de bounds y con signos correctos
-
+start = perf_counter()
 # Least Squares Optimization to solve paraxial equations
 B_sistem = least_squares(Complete_Matrix, initial_guess, bounds=bounds, 
                                         verbose=0, ftol = 1e-12)
 [b_3, b_4, b_5] = B_sistem.x
 
+elapsed_time = perf_counter() - start
+print(f"Optimization time: {elapsed_time:.3f} s")
 # Display the solution
 print("Power of lenses numerical Solution:", b_3, b_4, b_5)
 

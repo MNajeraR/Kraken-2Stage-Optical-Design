@@ -353,7 +353,6 @@ print('')
 # ===============================
 print("\nStarting Classical Optimization...")
 
-start_time = time.time()
 
 # Initialize the optimizer with system and rays
 Classic_Result = Three_Lens_Optimizer([Telescope_f85_FR,Rays])
@@ -372,12 +371,14 @@ Liminf = [-1e6] * 7
 Limsup = [1e6] * 7
 bounds = (Liminf, Limsup)
 
+start_time = time.time()
+
 # Perform the optimization
 Result = scipy.optimize.least_squares(Classic_Result.Set_RcValues, set_R0, bounds=bounds, verbose=0, 
                                       ftol = 1e-4)
-R1, R2, R3, R4, R5, R6, d5 = Result.x
 elapsed_time = time.time() - start_time
 
+R1, R2, R3, R4, R5, R6, d5 = Result.x
 
 # Update the optical system
 Telescope_f85_FR.SDT[3].Rc = R1
