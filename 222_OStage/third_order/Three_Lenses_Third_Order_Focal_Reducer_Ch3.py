@@ -36,7 +36,7 @@ import time
 import numpy as np
 import pkg_resources
 import scipy
-
+from time import perf_counter
 
 # Import KrakenOS and custom modules
 from utils import (Paraxial_Cal, ThirdLens_3O_20, 
@@ -352,8 +352,6 @@ print('')
 # ======================================
 
 print("\nStarting Optimization...")
-# Start timing the optimization process
-start_time = time.time()
 
 # Initialize third-order aberration analysis with the current lens parameters
 TO_data = ThirdLens_3O_20(Telescope_f85_FR)
@@ -369,14 +367,17 @@ LimInf = [-10000000, -100000000, -10000000, -100000000, -10000000, -100000000, -
 LimSup = [ 100000000, 100000000,  100000000, 100000000,  100000000, 100000000,  1000]
 b = (LimInf, LimSup)
 
+# Start timing the optimization process
+start = perf_counter()
 
 # Perform the least-squares optimization to find optimal curvatures and thickness
 Curvatur_Rad = scipy.optimize.least_squares(TO_data.SeedPar, initial_guess, bounds=b, verbose=1, 
                                             method = 'trf', ftol = 1e-2)
+elapsed_time = perf_counter() - start
+print(f"Optimization time: {elapsed_time:.3f} s")
 
 # Extract the results
 [R_1, R_2, R_3, R_4, R_5, R_6, d5] = Curvatur_Rad.x
-elapsed_time = time.time() - start_time
 Set_Initial_Opt = [R_1, R_2, R_3, R_4, R_5, R_6, d5]
 
 # ======================================
