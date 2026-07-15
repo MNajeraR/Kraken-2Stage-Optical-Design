@@ -57,22 +57,29 @@ For the two-lens configuration, only the blue channel is considered. For the thr
 
 ---
 
-### `rms_optimization/`
+## rms_optimization/
 
 This folder contains the scripts associated with the second optimization stage based on RMS-driven merit functions (RMSMF).
 
-The scripts follow the naming convention:
+The primary optimization scripts follow the naming convention:
 
-```text
+```
 RMSMF_LS_Optimization_iL_Focal_Reducer_Chj.py
 ```
 
 where:
 
-- `i` indicates the number of lenses (`2L` or `3L`).
-- `Chj` indicates the spectral channel (`j = 1, 2, 3`).
+- **i** indicates the number of lenses (2L or 3L).
+- **Chj** indicates the spectral channel (j = 1, 2, 3).
+- For the two-lens configuration, only the blue channel is considered.
 
-For the two-lens configuration, only the blue channel is considered.
+In addition, the folder includes the script:
+
+```
+RMSMF_LS_Direct_From_Third_Order_3L_Focal_Reducer_Ch1.py
+```
+
+which performs RMS refinement directly from the third-order starting design, bypassing the intermediate PGMF stage. This script was developed to provide a direct comparison between the optimization workflows
 
 ---
 
