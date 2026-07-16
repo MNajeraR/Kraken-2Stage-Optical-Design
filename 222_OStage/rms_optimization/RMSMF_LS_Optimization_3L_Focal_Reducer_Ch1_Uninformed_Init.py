@@ -45,6 +45,7 @@ Glass = 'K-PFK85 & ADF355 & K-PFK85'
 glass_tag = Glass.replace(" ", "").replace("&", "_")
 Glass_list = [g.strip() for g in Glass.split('&')]
 
+optimizedparameters_ROOT = Path(__file__).resolve().parents[1]
 # ============================================================
 # Uninformed initialization settings
 # ============================================================
