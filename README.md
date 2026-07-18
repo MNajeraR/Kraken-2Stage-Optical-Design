@@ -81,6 +81,11 @@ RMSMF_LS_Direct_From_Third_Order_3L_Focal_Reducer_Ch1.py
 
 which performs RMS refinement directly from the third-order starting design, bypassing the intermediate PGMF stage. This script was developed to provide a direct comparison between the optimization workflows.
 
+```
+`RMSMF_LS_Optimization_3L_Focal_Reducer_Ch1_Uninformed_Init.py`
+```
+which evaluates RMS optimization using uninformed initialization strategies (`equal_pair_fixed`, `equal_pair_random`, and `fully_random`) for comparison with the physically informed SPD initialization.
+
 ---
 
 ### `results/`
