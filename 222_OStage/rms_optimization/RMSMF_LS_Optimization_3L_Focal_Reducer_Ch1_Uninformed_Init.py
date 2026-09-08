@@ -689,7 +689,7 @@ deltaZRMS = R_RMS_delta(deltaZ, all_points_l, all_points_m, all_points_n,
 
 # Display initial spot size performance
 print("======================================")
-print("Initial RMS radius from Gaussian quadrature sampling:")
+print("Final RMS radius from Gaussian quadrature sampling:")
 print(f"RMS (using deltaZ correction): {deltaZRMS*1000:.2f} µm")
 print(f"Effective Focal Length: {EFFL_INITIAL:.2f}")
 print("======================================")
